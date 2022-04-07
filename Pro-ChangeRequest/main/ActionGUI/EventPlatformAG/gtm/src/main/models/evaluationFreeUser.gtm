@@ -1,0 +1,1239 @@
+Window EvaluationFreeUserWindow {
+    Person freeUser1
+    Person freeUser2
+    Person freeUser3
+    Person freeUser4
+    Person freshUser1
+    Person freshUser2
+    Person freshUser3
+
+    Person person
+    Event public
+    Event private
+    Category category  
+
+    Category testCategoryOne
+    Category testCategoryTwo
+    Category testCategoryThree
+
+    Person moderator    
+    Person otherUser
+    Person premium       
+    Person otherModerator
+
+    Event ownEvent
+    Event ownEvent2    
+    Event ownEvent3   
+    Event ownEvent4  
+    Event othersEvent
+    Event othersEvent2
+    Event othersEvent3
+    Event othersEvent4    
+    Event othersEvent5  
+    Event othersEvent6
+    Event othersEvent7    
+    Event othersEvent8
+    Event othersEvent9
+    Event othersEvent10     
+    Event othersEvent11 
+    Event othersEvent12          
+    Event privateEvent
+    Event privateEvent2
+    Event privateEvent3
+
+    Integer passed := [0]
+    String failedTestCases := ['']
+
+    Label Passed_L {
+        String text := ['Number of passed test cases: ' + $EvaluationFreeUserWindow.passed$.toString()]
+    }
+
+    Label Failed_L {
+        String text := ['Failed the following test cases: ' + $EvaluationFreeUserWindow.failedTestCases$]
+    }
+
+    Button TestCases_B {
+        String text:= ['Run Test Cases']
+        String readString
+        Boolean readBool
+        Person readUser
+        Role readRole
+        Set(Category) readCategories
+        Set(Event) readEvents
+
+        Person thirdUser
+        Event othersEventManaging
+        Category testCategoryTwo
+        Category testCategoryThree
+        
+
+        Integer readInteger
+        Person readPerson
+        Set(Person) readPersons
+        event onClick {
+            EvaluationFreeUserWindow.passed:= [0]
+            EvaluationFreeUserWindow.failedTestCases:= ['']
+
+
+            // Test Case 1: Create a Person
+            // Should FAIL
+            try {
+
+                testCreateUserFree := new Person
+            
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' CreatePerson ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+            // Test Case 2: Change username from null to smth
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.freshUser1$.username]:=['smth']
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeUsernameNullSmth ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+            // Test Case 3: Change username from smth to smthp
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.freeUser1$.username]:=['smthp']
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeUsernameSmthSmthp ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+            // Test Case 4: Change password from null to smth
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.freshUser1$.password]:=['smth']
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangePasswdNullSmth ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+            // Test Case 5: Change password from smth to smthp
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.freeUser1$.password]:=['smthp']
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangePasswdSmthSmthp ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }  
+
+            // Test Case 6: Change role from null to null
+            // Should not be tested
+            // try {
+            // 
+            //     [$EvaluationFreeUserWindow.freshUser1$.role]:=[null]
+            //     EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeRoleNullNull ']
+            // } catch (SecurityException) {
+            //     EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            // } 
+
+            // Test Case 7: Change role from null to FREEUSER
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.freshUser1$.role]:=[Role::FREEUSER]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeRoleNullFree ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+            // Test Case 8: Change role from null to NONE
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.freshUser2$.role]:=[Role::NONE]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeRoleNullNone ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+
+            // Test Case 9: Change role from null to ADMIN
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.freshUser3$.role]:=[Role::ADMIN]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeRoleNullAdmin ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+
+            // Test Case 10: Change role from FREEUSER to null
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.freeUser1$.role]:=[null]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeRoleFreeNull ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+
+            // Test Case 11: Change role from FREEUSER to NONE
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.freeUser2$.role]:=[Role::NONE]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeRoleFreeNone ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+
+            // Test Case 12: Change role from FREEUSER to PREMIUMUSER
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.freeUser3$.role]:=[Role::PREMIUMUSER]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeRoleFreePremium ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }  
+
+
+            // Test Case 13: Change role from FREEUSER to ADMIN
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.freeUser4$.role]:=[Role::ADMIN]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeRoleFreeAdmin ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }  
+
+
+            // Test Case 14: Read username 
+            // Should PASS
+            try {
+
+                readString := [$EvaluationFreeUserWindow.freeUser1$.username] 
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadUsername ']
+            }
+
+            // Test Case 15: Read password 
+            // Should FAIL
+            try {
+
+                readString := [$EvaluationFreeUserWindow.freeUser1$.password]
+    
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadPwd ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+            // Test Case 16: Read role
+            // Should PASS
+            try {
+
+                readRole := [$EvaluationFreeUserWindow.freeUser1$.role] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadRole ']
+            }
+
+
+            // Test Case 17: Read Person.moderates
+            // Should PASS
+            try {
+
+                readCategories := [$EvaluationFreeUserWindow.person$.moderates] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadPersonModerates ']
+            }   
+
+            // Test Case 18: Read Event.private
+            // Should PASS
+            try {
+
+                readBool := [$EvaluationFreeUserWindow.public$.private] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadEventPrivate ']
+            } 
+
+            // Test Case 19: Read Event.categories
+            // Should PASS
+            try {
+
+                readCategories := [$EvaluationFreeUserWindow.public$.categories] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadEventCatergories ']
+            } 
+
+            // Test Case 20: Read Event.title of a public event
+            // Should PASS
+            try {
+
+                readString := [$EvaluationFreeUserWindow.public$.title] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadEventTitlePublic ']
+            } 
+
+            // Test Case 21: Read Event.title of a private event
+            // Should FAIL
+            try {
+
+                readString := [$EvaluationFreeUserWindow.private$.title] 
+    
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadEventTitlePrivate ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } 
+
+            // Test Case 22: Read Event.description of a public event
+            // Should PASS
+            try {
+
+                readString := [$EvaluationFreeUserWindow.public$.description] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadEventDescriptionPublic ']
+            } 
+
+            // Test Case 23: Read Event.description of a private event
+            // Should FAIL
+            try {
+
+                readString := [$EvaluationFreeUserWindow.private$.description] 
+    
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadEventDescriptionPrivate ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } 
+
+
+            // Test Case 24: Read Event.owner of a public event
+            // Should PASS
+            try {
+
+                readPerson := [$EvaluationFreeUserWindow.public$.owner] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadEventOwnerPublic ']
+            } 
+
+            // Test Case 25: Read Event.owner of a private event
+            // Should FAIL
+            try {
+
+                readPerson := [$EvaluationFreeUserWindow.private$.owner] 
+    
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadEventOwnerPrivate ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } 
+
+            // Test Case 26: Read Category.name 
+            // Should PASS
+            try {
+
+                readString := [$EvaluationFreeUserWindow.category$.name] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadCategoryName ']
+            } 
+
+            // Test Case 27: Read Category.moderators 
+            // Should PASS
+            try {
+
+                readPersons := [$EvaluationFreeUserWindow.category$.moderators] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadCategoryModerators ']
+            } 
+
+            // Test Case 28: Read Category.events 
+            // Should PASS
+            try {
+
+                readEvents := [$EvaluationFreeUserWindow.category$.events] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadCategoryEvents ']
+            } 
+
+
+
+
+
+
+
+            // Test Case 29: Create a public event
+            // Should PASS
+            try {
+                newEventTestFree := new Event
+                // Alternate between person and event association ends to probe
+                // symmetric implementation of constraints.
+                [$EvaluationFreeUserWindow.caller$.events] += [$newEventTestFree$]
+                [$EvaluationFreeUserWindow.caller$.manages] += [$newEventTestFree$]
+                [$newEventTestFree$.attendants] += [$EvaluationFreeUserWindow.caller$]
+
+                [$newEventTestFree$.private] := [false]
+                [$newEventTestFree$.title] := ['Test event']
+                [$newEventTestFree$.description] := ['Test description']
+                [$EvaluationFreeUserWindow.testCategoryOne$.events] += [$newEventTestFree$]
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' CreatePublic ']
+            }
+
+
+            // Test Case 30: Read core info of public event created by someone else
+            // Should PASS
+            try {
+                readString := [$EvaluationFreeUserWindow.othersEvent$.title]
+                readString := [$EvaluationFreeUserWindow.othersEvent$.description]
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadCoreInfoPublic ']
+            }            
+
+            // Test Case 31: Read core info of private event created by someone else and not participating
+            // Should FAIL
+            try {
+                readString := [$EvaluationFreeUserWindow.privateEvent$.title]
+                readString := [$EvaluationFreeUserWindow.privateEvent$.description]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadCoreInfoPrivate ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+            // Test Case 32: Read attendants of public event created by someone else
+            // Should PASS
+            try {
+                readPersons := [$EvaluationFreeUserWindow.othersEvent$.attendants]
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadAttendantsPublic ']
+            }  
+
+            // Test Case 33: Read attendants of private event created by someone else and not participating
+            // Should FAIL
+            try {
+                readPersons := [$EvaluationFreeUserWindow.privateEvent$.attendants]
+
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadAttendantsPrivate ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }                 
+
+            // Test Case 34: Read attendants of private event created by someone else and attending
+            // Should be N/A
+            // try {
+            //     readPersons := [$EvaluationFreeUserWindow.privateEvent2$.attendants]
+            //     EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            // } catch (SecurityException) {
+            //    EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadAttendantsOthersPrivateAttending ']
+            // }  
+
+
+
+            // Test Case 35: Edit others event if one is manager
+            // Should PASS
+            try {
+                [$EvaluationFreeUserWindow.othersEvent3$.title] := ['Test event edit']
+                [$EvaluationFreeUserWindow.othersEvent3$.description] := ['Test description edit']
+                
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' EditOthersManager ']
+            }
+
+            // Test Case 36: Edit others event if not manager
+            // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.othersEvent2$.title] := ['Test event edit']
+                [$EvaluationFreeUserWindow.othersEvent2$.description] := ['Test description edit']
+                
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' EditEventOthers ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }                 
+
+            // Test Case 37: Edit owner of event
+            // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.othersEvent2$.owner] := [$EvaluationFreeUserWindow.caller$]
+ 
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' EditOwner ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }                 
+
+            // Test Case 38: Promote attendant to manager from event owned
+            // Should PASS
+            try {
+                [$EvaluationFreeUserWindow.ownEvent$.managedBy] += [$EvaluationFreeUserWindow.otherUser$]
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' PromoteAttendantOwn ']
+            }
+
+            // Test Case 39: Demote Manager from event owned
+            // Should PASS
+            try {
+                [$EvaluationFreeUserWindow.ownEvent2$.managedBy] -= [$EvaluationFreeUserWindow.otherUser$]
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' DemoteManagerOwn ']
+            }       
+
+            // Test Case 40: Demote manager for event not owned
+           // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.othersEvent2$.managedBy] -= [$EvaluationFreeUserWindow.otherUser$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' DemoteManagerOthers ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+            // Test Case 41: Accept request to join event owned
+            // Should PASS
+            try {
+
+                [$EvaluationFreeUserWindow.ownEvent3$.attendants] += [$EvaluationFreeUserWindow.otherUser$]
+                [$EvaluationFreeUserWindow.ownEvent3$.requesters] -= [$EvaluationFreeUserWindow.otherUser$]
+                
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' AcceptRequest ']
+            }      
+
+            // Test Case 42: Accept request to join event managed
+            // Should PASS
+            try {
+
+                [$EvaluationFreeUserWindow.othersEvent3$.attendants] += [$EvaluationFreeUserWindow.moderator$]
+                [$EvaluationFreeUserWindow.othersEvent3$.requesters] -= [$EvaluationFreeUserWindow.moderator$]
+                
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' AccepetRequestManager ']
+            }      
+
+
+            // Test Case 43: Accept own request, not owner not manager
+           // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.othersEvent4$.attendants] += [$EvaluationFreeUserWindow.caller$]
+                [$EvaluationFreeUserWindow.othersEvent4$.requesters] -= [$EvaluationFreeUserWindow.caller$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' AcceptNotOwnerNotManager ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+            // Test Case 44: Promote oneself as manager for event not owned
+           // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.caller$.manages] += [$EvaluationFreeUserWindow.othersEvent$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' PromoteAttendantOthers ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+
+
+            // Test Case 45: Reject request to join own event
+            // Should PASS
+            try {
+
+                [$EvaluationFreeUserWindow.ownEvent3$.requesters] -= [$EvaluationFreeUserWindow.moderator$]
+                
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RejectRequestOwner ']
+            }   
+
+            // Test Case 46: Reject request to join manager
+            // Should PASS
+            try {
+
+                [$EvaluationFreeUserWindow.othersEvent5$.requesters] -= [$EvaluationFreeUserWindow.premium$]
+                
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RejectRequestManager ']
+            }   
+
+
+            // Test Case 47: Remove oneself from attending an event, not owner
+            // Should PASS
+            try {
+
+                [$EvaluationFreeUserWindow.othersEvent6$.attendants] -= [$EvaluationFreeUserWindow.caller$]
+                
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RemoveOneselfNotOwner ']
+            }   
+
+            // Test Case 48: Remove others from attending an event, manager
+            // Should PASS
+            try {
+
+                [$EvaluationFreeUserWindow.othersEvent7$.attendants] -= [$EvaluationFreeUserWindow.premium$]
+                
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RemoveOneselfManager ']
+            }   
+
+
+            // Test Case 49: Owner removes himself from attending event
+            // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.ownEvent$.attendants] -= [$EvaluationFreeUserWindow.caller$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' OwnerRemovesHimself ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+            // Test Case 50: Non manager removes someone else from event
+            // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.othersEvent8$.attendants] -= [$EvaluationFreeUserWindow.premium$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' NonManagerRemovesOther ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+
+            // Test Case 51: Request to join public event
+            // Should PASS
+            try {
+                [$EvaluationFreeUserWindow.caller$.requests] += [$EvaluationFreeUserWindow.othersEvent2$]
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RequestPublicEvent ']
+            }
+
+            // Test Case 52: Request to join private event
+           // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.caller$.requests] += [$EvaluationFreeUserWindow.privateEvent$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RequestPrivateEvent ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+            // Test Case 53: Reject other's request to join, non manager, non owner
+            // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.othersEvent9$.requesters] -= [$EvaluationFreeUserWindow.premium$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RejectRequestNoManagerNoRequester ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+            // Test Case 54: Cancel own request
+            // Should PASS
+            try {
+                 [$EvaluationFreeUserWindow.othersEvent10$.requesters] -= [$EvaluationFreeUserWindow.caller$]
+
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' CancelOwnRequest ']
+            }                                                  
+
+
+             // Test Case 55: Request to join for someone else
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.othersEvent12$.requesters] += [$EvaluationFreeUserWindow.premium$]
+
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RequestJoinSomeoneElse ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }                                                     
+
+            // Test Case 56: Read core information of other users
+            // Should PASS
+            try {
+
+                readString := [$EvaluationFreeUserWindow.otherUser$.name] 
+    
+                readString := [$EvaluationFreeUserWindow.otherUser$.surname]  
+                
+            EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadOthersCore ']
+            }       
+
+            // Test Case 57: Read own core information 
+            // Should PASS
+            try {
+
+                readString := [$EvaluationFreeUserWindow.caller$.name] 
+    
+                readString := [$EvaluationFreeUserWindow.caller$.surname]  
+                
+            EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadOwnCore ']
+            }        
+
+            // Test Case 58: Edit own core information 
+            // Should PASS
+            try {
+
+                [$EvaluationFreeUserWindow.caller$.name] := ['Edit']
+    
+                [$EvaluationFreeUserWindow.caller$.surname]  := ['Edit']
+                
+            EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' EditOwnCore ']
+            }        
+
+            // Test Case 59: Edit others core 
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.otherUser$.name] := ['Edit']
+    
+                [$EvaluationFreeUserWindow.otherUser$.surname]  := ['Edit']
+                
+            EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' EditOthersCore ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } 
+
+            // Test Case 60: View own events
+            // Should PASS
+            try {
+
+                readEvents := [$EvaluationFreeUserWindow.caller$.events]  
+                
+            EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadOwnEvents ']
+            }    
+
+            // Test Case 61: View managed events
+            // Should PASS
+            try {
+
+                readEvents := [$EvaluationFreeUserWindow.caller$.manages]  
+                
+            EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadManagedEvents ']
+            }    
+
+
+            // Test Case 62: View attending events
+            // Should PASS
+            try {
+
+                readEvents := [$EvaluationFreeUserWindow.caller$.attends]  
+                
+            EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadAttendingEvents ']
+            }    
+
+            // Test Case 63: Change own role
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.caller$.role] := [Role::PREMIUMUSER]
+
+                
+            EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeOwnRole ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } 
+
+            // Test Case 64: View requested access
+            // Should PASS
+            try {
+
+                readEvents := [$EvaluationFreeUserWindow.caller$.requests]  
+                
+            EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadRequestedEvents ']
+            }    
+  
+
+            // Test Case 65: View subscribed categories
+            // Should PASS
+            try {
+
+                readCategories := [$EvaluationFreeUserWindow.caller$.subscriptions]  
+                
+            EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadSubscribedCategories ']
+            } 
+
+
+
+
+
+
+
+
+                       
+
+    
+
+            // Test Case 66: Unsubscribe from categories
+            // Should be N/A
+            // try {
+            // 
+            //   [$EvaluationFreeUserWindow.testCategoryOne$.subscribers] -= [$EvaluationFreeUserWindow.caller$]
+            //  
+            // EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            // } catch (SecurityException) {
+            //     EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' UnSubscribeFromCategory ']
+            // } 
+
+            // Test Case 67: Subscribe to categories
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.testCategoryOne$.subscribers] += [$EvaluationFreeUserWindow.caller$]
+
+                
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' SubscribeToCategory ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } 
+
+            // Test Case 68: Add category to your subscriptions
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.caller$.subscriptions] += [$EvaluationFreeUserWindow.testCategoryOne$]
+                
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' AddCategoryToSubscriptions ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } 
+
+
+            // Test Case 69: Create a private event
+            // Should FAIL
+            try {
+                newEventTestFreePrivate := new Event
+                [$EvaluationFreeUserWindow.caller$.events] += [$newEventTestFreePrivate$]
+                [$EvaluationFreeUserWindow.caller$.manages] += [$newEventTestFreePrivate$]
+                [$EvaluationFreeUserWindow.caller$.attends] += [$newEventTestFreePrivate$]
+
+                [$newEventTestFreePrivate$.private] := [true]
+                [$newEventTestFreePrivate$.title] := ['Test event']
+                [$newEventTestFreePrivate$.description] := ['Test description']
+                [$newEventTestFreePrivate$.categories] += [$EvaluationFreeUserWindow.testCategoryOne$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' CreatePrivateFree ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+
+
+
+
+
+
+
+
+            // Test Case 70: Remove category they do not moderate from event
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.othersEvent11$.categories] -= [$EvaluationFreeUserWindow.testCategoryTwo$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RemoveCategoryEventNotModerated ']
+                
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+
+            // Test Case 71: Remove someone else as moderator for category
+            // Should not be tested
+            // try {
+            // 
+            //     [$EvaluationFreeUserWindow.testCategoryTwo$.moderators] -= [$EvaluationFreeUserWindow.otherModerator$]
+            // 
+            //     EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RemoveModerator ']
+            // } catch (SecurityException) {
+            //     EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            // }    
+
+
+            // Test Case 72: Remove oneself as moderator from category
+            // Should be N/A
+            // try {
+            // 
+            //     [$EvaluationFreeUserWindow.testCategoryThree$.moderators] -= [$EvaluationFreeUserWindow.caller$]
+            // 
+            //     
+            // EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            // } catch (SecurityException) {
+            //     EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RemoveOneSelfCategory ']
+            // }    
+
+
+            // Test Case 73: Remove category moderated from event
+            // Should be N/A
+            // try {
+            // 
+            // 
+            //     [$EvaluationFreeUserWindow.othersEvent2$.categories] -= [$EvaluationFreeUserWindow.testCategoryOne$]
+            //  
+            //     EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RemoveCategoryModerated ']
+            //     
+            // } catch (SecurityException) {
+            //     EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            // }                
+
+
+            // Test Case 74: Read category subscribers
+            // Should FAIL
+            try {
+
+                readPersons := [$EvaluationFreeUserWindow.testCategoryOne$.subscribers] 
+
+                
+            EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadCategorySubscribers ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } 
+
+
+
+
+
+
+
+
+
+
+            // Test Case 75: Delete user
+            // Should FAIL
+            try {
+
+                    delete [$EvaluationFreeUserWindow.freeUser1$]                
+                
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' DeleteUser ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }  
+
+            // Test Case 76: Edit pwd other user
+            // Should not be tested
+            // try {
+            // 
+            //     [$EvaluationFreeUserWindow.otherUser$.password] := ['pwdadmin']
+            //     
+            //     EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' EditPwdOther ']
+            // } catch (SecurityException) {
+            //     EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            // }              
+
+            // Test Case 77: Edit role other user
+            // Should not be tested
+            // try {
+            // 
+            //     [$EvaluationFreeUserWindow.otherUser$.role]:=[Role::PREMIUMUSER]          
+            //     EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' EditRoleOther ']
+            // } catch (SecurityException) {
+            //     EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            // }    
+
+           // Test Case 78: Add user as moderator category
+             // Should FAIL
+            try {
+
+
+                    [$EvaluationFreeUserWindow.testCategoryThree$.moderators] += [$EvaluationFreeUserWindow.otherModerator$]      
+                
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' AddUserModerator ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }            
+
+           // Test Case 79: Remove user as moderator category
+             // Should FAIL
+            try {
+
+
+                    [$EvaluationFreeUserWindow.testCategoryTwo$.moderators] -= [$EvaluationFreeUserWindow.otherModerator$]      
+                
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' RemoveUserModerator ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }                    
+
+
+
+           // Test Case 80: Create Category
+             // Should FAIL
+            try {
+
+                    testCategoryFree := new Category
+                    [$testCategoryFree$.name] := ['CategoryAdmin']
+
+                
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' CreateCategory ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }  
+
+
+           // Test Case 81: Delete Category
+             // Should FAIL
+            try {
+
+                    delete [$EvaluationFreeUserWindow.testCategoryThree$]
+
+                
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' DeleteCategory ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+           // Test Case 82: Change Category Name
+             // Should FAIL
+            try {
+
+                    [$EvaluationFreeUserWindow.testCategoryTwo$.name] := ['newName']
+
+                
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeCategoryName ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }  
+
+
+
+
+            // Test Case 83: As a manager add attendant that has not requested
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.othersEvent3$.attendants] += [$EvaluationFreeUserWindow.freeUser1$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ManagerAddAttendantNotRequested ']
+                
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+
+
+            // Test Case 84: Owner removes oneself from managing the event
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.ownEvent$.managedBy] -= [$EvaluationFreeUserWindow.caller$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' OwnerRemovesHimselfAsManager ']
+                
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }  
+
+
+            // Test Case 85: Owner removes oneself from managing the event
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.ownEvent$.owner] := [$EvaluationFreeUserWindow.freeUser1$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' OwnerRemovesHimselfAsOwner ']
+                
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+
+
+             // Test Case 86: Manager remove oneself from attendants list
+            // Should FAIL
+            try {
+
+                [$EvaluationFreeUserWindow.othersEvent3$.attendants] -= [$EvaluationFreeUserWindow.caller$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ManagerRemovesHimselfAsAttendant ']
+                
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+
+
+            // Test Case 87: Manager remove oneself from managers list
+            // Should FAIL
+            try {
+             
+               [$EvaluationFreeUserWindow.othersEvent3$.managedBy] -= [$EvaluationFreeUserWindow.caller$]
+             
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ManagerRemovesHimselfAsManager ']
+                 
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }   
+
+
+            // Test Case 88: Modify the role of a moderator while they moderate a category 
+            // Should be N/A
+            // try {
+            // 
+            //   [$EvaluationFreeUserWindow.moderator$.role] := [Role::FREEUSER]
+            // 
+            //   EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ModifyModeratorRoleWhileModerating  ']
+            //     
+            // } catch (SecurityException) {
+            //     EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            // }      
+
+          
+            // Test Case 89: Change role to VISITOR
+            // Should FAIL
+            try {
+            
+                [$EvaluationFreeUserWindow.freeUser1$.role]:=[Role::VISITOR]
+             
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ChangeRoleToVisitor ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } 
+
+
+            // Test Case 90: Accept someone else's request, not owner not manager
+            // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.othersEvent9$.attendants] += [$EvaluationFreeUserWindow.premium$]
+                [$EvaluationFreeUserWindow.othersEvent9$.requesters] -= [$EvaluationFreeUserWindow.premium$]
+
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' AcceptOthersNotOwnerNotManager ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }
+
+
+            // Test Case 91: Edit event's categories, manager
+            // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.othersEvent5$.categories] -= [$EvaluationFreeUserWindow.testCategoryOne$]
+
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' EditEventOthersCategoriesManager ']
+            }
+
+            // Test Case 92: Edit event's categories, not manager
+            // Should FAIL
+            try {
+                [$EvaluationFreeUserWindow.othersEvent2$.categories] -= [$EvaluationFreeUserWindow.testCategoryOne$]
+                
+                EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' EditEventOthersCategories ']
+            } catch (SecurityException) {
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            }  
+
+
+
+            // Test Case 93: Read Event.private for private event
+            // Should PASS
+            try {
+
+                readBool := [$EvaluationFreeUserWindow.private$.private] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadPrivateEventPrivate ']
+            }  
+
+
+            // Test Case 94: Read Event.categories of a private event
+            // Should PASS
+            try {
+
+                readCategories := [$EvaluationFreeUserWindow.private$.categories] 
+    
+                EvaluationFreeUserWindow.passed := [$EvaluationFreeUserWindow.passed$ + 1]
+            } catch (SecurityException) {
+               EvaluationFreeUserWindow.failedTestCases:= [$EvaluationFreeUserWindow.failedTestCases$ + ' ReadPrivateEventCatergories ']
+            }
+
+
+
+            reevaluate Passed_L.text
+            reevaluate Failed_L.text
+        }
+        
+    }
+
+    Button Back_B {
+        String text := ['Back to main evaluation window']
+        event onClick {
+            open EvaluationWindow(role:[Role::SYSTEM])
+        }
+    }
+}

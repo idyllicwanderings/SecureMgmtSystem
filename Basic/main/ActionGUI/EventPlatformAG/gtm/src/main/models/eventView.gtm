@@ -1,0 +1,68 @@
+Window EventViewWindow {
+    Event entity
+    Label Title_L {
+        String text:= ['Title: ' + $EventViewWindow.entity$.title]
+    }
+    Label Description_L {
+        String text := ['Description: ' + $EventViewWindow.entity$.description]
+    }
+    Table Table_Category_T {
+        Set(Category) rows := [$EventViewWindow.entity$.categories]
+        columns {
+            ['Name'] : Label name {
+                event onView (text) {
+                    try {
+                        text := [$Table_Category_T.row$.name]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+           }
+        }
+    }
+    Button Edit_Evt_B {
+        String text:= ['Edit Event']
+        Boolean probe1
+        event onClick {
+            try {
+                probe1 := [$EventViewWindow.entity$.private]
+                open EventEditWindow(caller:[$EventViewWindow.caller$], role:[$EventViewWindow.role$], entity:[$EventViewWindow.entity$])
+
+            } catch (SecurityException) {
+                notification(['Error'],['Not allowed'],[500])
+            }
+            
+        }
+    }
+    Button View_B {
+        String text:= ['Show attendees']
+        event onClick {
+            try {
+                Table_Att_T.rows := [$EventViewWindow.entity$.attendants->collect(m|m.name.concat(' ').concat(m.surname))->asSet()]
+            } catch(SecurityException) {
+                notification(['Error'],['Not allowed'],[500])
+            }
+        }
+    }
+    Table Table_Att_T {
+        Set(String) rows := [Set {}]
+        columns {
+            ['Attendees'] : Label atts {
+                event onView (text) {
+                    try {
+                        text := [$Table_Att_T.row$]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+
+    Button Back_B {
+        String text := ['Back']
+        event onClick {
+            back
+        }
+    }
+}

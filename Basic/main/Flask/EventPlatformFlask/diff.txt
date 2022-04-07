@@ -1,0 +1,1152 @@
+Index: src/app.py
+===================================================================
+--- src/app.py	(revision 159418)
++++ src/app.py	(revision 159445)
+@@ -1,11 +1,11 @@
+-from flask import Flask, render_template, request, redirect, url_for
+-from flask_sqlalchemy import SQLAlchemy
+-from flask_user import login_required, UserManager, roles_required, user_registered
+-from model import db, Person, Role, Event, Category, FREEUSER, PREMIUMUSER, MODERATOR, ADMIN
++from flask import Flask, render_template, redirect, url_for, Response
++from flask_user import UserManager, user_registered, user_logged_in
++from model import db, Person, Role, FREEUSER, PREMIUMUSER, MODERATOR, ADMIN
+ from project import SecurityException, init
+-import jinja2
++from flask_principal import Principal, Identity, identity_loaded, identity_changed
+ 
+ 
++
+ app = Flask(__name__)
+ 
+ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+@@ -24,7 +24,7 @@
+ @user_registered.connect_via(app)
+ def after_user_registered_hook(sender, user, **extra):
+     role = Role.query.filter_by(name=FREEUSER).one()
+-    user.roles=role
++    user.role=role
+     db.session.commit()
+ 
+ db.init_app(app)
+@@ -42,6 +42,19 @@
+ 
+ user_manager = UserManager(app, db, Person)
+ 
++principals = Principal(app)
++
++@user_logged_in.connect_via(app)
++def _after_login_hook(sender, user, **extra):
++    identity_changed.send(app,identity=Identity(user.id))
++
++
++@identity_loaded.connect_via(app)
++def on_identity_loaded(sender, identity):
++    from project import on_identity_loaded
++    return on_identity_loaded(sender, identity) 
++
++
+ init()
+ 
+ def secure(func):
+@@ -61,7 +74,11 @@
+ @secure
+ def main():
+     from project import main 
+-    return render_template('main.html', **main())
++    result=main()
++    if type(result) == Response:
++        return result
++    else: 
++        return render_template('main.html', **result)
+         
+ 
+ @app.route('/profile')
+@@ -68,7 +85,11 @@
+ @secure
+ def profile():
+     from project import profile 
+-    return render_template('profile.html', **profile())
++    result=profile()
++    if type(result) == Response:
++        return result
++    else: 
++        return render_template('profile.html', **result)
+         
+ 
+ @app.route('/events')
+@@ -75,7 +96,11 @@
+ @secure
+ def events():
+     from project import events 
+-    return render_template('events.html', **events())
++    result=events()
++    if type(result) == Response:
++        return result
++    else: 
++        return render_template('events.html', **result)
+ 
+ 
+ @app.route('/view_event/<int:id>')
+@@ -82,7 +107,11 @@
+ @secure
+ def view_event(id):
+     from project import view_event 
+-    return render_template('view_event.html', **view_event(id))
++    result=view_event(id)
++    if type(result) == Response:
++        return result
++    else: 
++        return render_template('view_event.html', **result)
+ 
+ 
+ @app.route('/edit_event/<int:id>')
+@@ -89,7 +118,11 @@
+ @secure
+ def edit_event(id):
+     from project import edit_event 
+-    return render_template('edit_event.html', **edit_event(id))
++    result=edit_event(id)
++    if type(result) == Response:
++        return result
++    else: 
++        return render_template('edit_event.html', **result)
+ 
+ 
+ @app.post('/update_event')
+@@ -96,8 +129,11 @@
+ @secure
+ def update_event():
+     from project import update_event 
+-    id = update_event()
+-    return redirect(url_for('edit_event',id=id))
++    result=update_event()
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('edit_event',id=result))
+ 
+ 
+ 
+@@ -105,8 +141,11 @@
+ @secure
+ def join(id):
+     from project import join 
+-    join(id)
+-    return redirect(url_for('events'))
++    result=join(id)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('events'))
+ 
+ 
+ @app.route('/leave/<int:id>')
+@@ -113,8 +152,11 @@
+ @secure
+ def leave(id):
+     from project import leave 
+-    leave(id)
+-    return redirect(url_for('profile'))
++    result=leave(id)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('profile'))
+ 
+ 
+ @app.post('/create_event')
+@@ -121,8 +163,11 @@
+ @secure
+ def create_event():
+     from project import create_event 
+-    create_event()
+-    return redirect(url_for('events'))
++    result=create_event()
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('events'))
+ 
+ 
+ @app.route('/manage_event/<int:id>')
+@@ -129,7 +174,11 @@
+ @secure
+ def manage_event(id):
+     from project import manage_event 
+-    return render_template('manage_event.html', **manage_event(id))
++    result=manage_event(id)
++    if type(result) == Response:
++        return result
++    else: 
++        return render_template('manage_event.html', **result)
+ 
+ 
+ @app.route('/categories')
+@@ -136,7 +185,11 @@
+ @secure
+ def categories():
+     from project import categories 
+-    return render_template('categories.html', **categories())
++    result=categories()
++    if type(result) == Response:
++        return result
++    else: 
++        return render_template('categories.html', **result)
+ 
+ 
+ @app.route('/view_category/<int:id>')
+@@ -143,7 +196,11 @@
+ @secure
+ def view_category(id):
+     from project import view_category 
+-    return render_template('view_category.html', **view_category(id))
++    result=view_category(id)
++    if type(result) == Response:
++        return result
++    else: 
++        return render_template('view_category.html', **result)
+ 
+ 
+ @app.route('/remove_category/<int:id>/<int:c>')
+@@ -150,8 +207,11 @@
+ @secure
+ def remove_category(id,c):
+     from project import remove_category 
+-    remove_category(id,c)
+-    return redirect(url_for('view_category',id=c))
++    result=remove_category(id,c)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('view_category',id=c))
+ 
+ 
+ @app.route('/edit_category/<int:id>')
+@@ -158,7 +218,11 @@
+ @secure
+ def edit_category(id):
+     from project import edit_category 
+-    return render_template('edit_category.html', **edit_category(id))
++    result=edit_category(id)
++    if type(result) == Response:
++        return result
++    else: 
++        return render_template('edit_category.html', **result)
+ 
+ 
+ @app.route('/add_moderator/<int:id>/<int:c>')
+@@ -165,8 +229,11 @@
+ @secure
+ def add_moderator(id,c):
+     from project import add_moderator 
+-    add_moderator(id,c)
+-    return redirect(url_for('edit_category',id=c))
++    result=add_moderator(id,c)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('edit_category',id=c))
+ 
+ 
+ @app.route('/remove_moderator/<int:id>/<int:c>')
+@@ -173,8 +240,11 @@
+ @secure
+ def remove_moderator(id,c):
+     from project import remove_moderator 
+-    remove_moderator(id,c)
+-    return redirect(url_for('edit_category',id=c))
++    result=remove_moderator(id,c)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('edit_category',id=c))
+ 
+ 
+ @app.post('/update_category')
+@@ -181,8 +251,11 @@
+ @secure
+ def update_category():
+     from project import update_category 
+-    id = update_category()
+-    return redirect(url_for('edit_category',id=id))
++    result=update_category()
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('edit_category',id=result))
+     
+ 
+ @app.route('/subscribe/<int:id>')
+@@ -189,8 +262,11 @@
+ @secure
+ def subscribe(id):
+     from project import subscribe 
+-    subscribe(id)
+-    return redirect(url_for('categories'))
++    result=subscribe(id)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('categories'))
+ 
+ 
+ @app.route('/unsubscribe/<int:id>')
+@@ -197,8 +273,11 @@
+ @secure
+ def unsubscribe(id):
+     from project import unsubscribe 
+-    unsubscribe(id)
+-    return redirect(url_for('profile'))
++    result=unsubscribe(id)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('profile'))
+ 
+ 
+ @app.post('/create_category')
+@@ -205,15 +284,22 @@
+ @secure
+ def create_category():
+     from project import create_category 
+-    create_category()
+-    return redirect(url_for('categories'))
++    result=create_category()
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('categories'))
+ 
+ 
+ @app.route('/users')
+ @secure
+ def users():
+-    from project import users 
+-    return render_template('users.html', **users())
++    from project import users
++    result=users()
++    if type(result) == Response:
++        return result
++    else: 
++        return render_template('users.html', **result) 
+         
+ 
+ @app.route('/user/<int:id>')
+@@ -220,7 +306,11 @@
+ @secure
+ def user(id):
+     from project import user 
+-    return render_template('user.html', **user(id))
++    result=user(id)
++    if type(result) == Response:
++        return result
++    else: 
++        return render_template('user.html', **result) 
+         
+ 
+ @app.post('/update_user')
+@@ -227,8 +317,11 @@
+ @secure
+ def update_user():
+     from project import update_user 
+-    id = update_user()
+-    return redirect(url_for('user',id=id))
++    result=update_user()
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('user',id=result))
+ 
+ 
+ @app.route('/promote_manager/<int:id>/<int:e>')
+@@ -235,8 +328,11 @@
+ @secure
+ def promote_manager(id,e):
+     from project import promote_manager 
+-    promote_manager(id,e)
+-    return redirect(url_for('manage_event',id=e))
++    result=promote_manager(id,e)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('manage_event',id=e))
+ 
+ 
+ @app.route('/demote_manager/<int:id>/<int:e>')
+@@ -243,8 +339,11 @@
+ @secure
+ def demote_manager(id,e):
+     from project import demote_manager 
+-    demote_manager(id,e)
+-    return redirect(url_for('manage_event',id=e))
++    result=demote_manager(id,e)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('manage_event',id=e))
+ 
+ 
+ @app.route('/remove_attendee/<int:id>/<int:e>')
+@@ -251,8 +350,11 @@
+ @secure
+ def remove_attendee(id,e):
+     from project import remove_attendee 
+-    remove_attendee(id,e)
+-    return redirect(url_for('manage_event',id=e))
++    result=remove_attendee(id,e)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('manage_event',id=e))
+ 
+ 
+ @app.route('/accept_request/<int:id>/<int:e>')
+@@ -259,8 +361,11 @@
+ @secure
+ def accept_request(id,e):
+     from project import accept_request 
+-    accept_request(id,e)
+-    return redirect(url_for('manage_event',id=e))
++    result=accept_request(id,e)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('manage_event',id=e))
+ 
+ 
+ @app.route('/reject_request/<int:id>/<int:e>')
+@@ -267,5 +372,8 @@
+ @secure
+ def reject_request(id,e):
+     from project import reject_request 
+-    reject_request(id,e)
+-    return redirect(url_for('manage_event',id=e))
+\ No newline at end of file
++    result=reject_request(id,e)
++    if type(result) == Response:
++        return result
++    else: 
++        return redirect(url_for('manage_event',id=e))
+\ No newline at end of file
+Index: src/model.py
+===================================================================
+--- src/model.py	(revision 159418)
++++ src/model.py	(revision 159445)
+@@ -48,18 +48,25 @@
+ class Person(db.Model,UserMixin):
+     id = db.Column(db.Integer, primary_key=True)
+     active = db.Column('is_active', db.Boolean(), nullable=False, server_default='1')
++    roles = db.relationship('Role', secondary='user_roles')
+     
+     name = db.Column(db.String(100, collation='NOCASE'))
+     surname = db.Column(db.String(100, collation='NOCASE'))
+     username = db.Column(db.String(100, collation='NOCASE'), nullable=False, unique=True)
+     password = db.Column(db.String(255), nullable=False, server_default='')
+-    roles = db.relationship('Role', secondary='user_roles', uselist=False)
+ 
+     events = db.relationship('Event', backref='owner')
+     manages = db.relationship('Event', secondary=mans, lazy='subquery', backref='managedBy')
+     attends = db.relationship('Event', secondary=atts, lazy='subquery', backref='attendants')
+     requests = db.relationship('Event', secondary=reqs, lazy='subquery', backref='requesters')
++
+     @property
++    def role(self):
++        return self.roles[0]
++    @role.setter
++    def role(self,r):
++        self.roles = [r]
++    @property
+     def fullname(self):
+         return f'{self.name} {self.surname}' 
+     @property
+@@ -101,5 +108,6 @@
+     @property
+     def candidates(self):
+         mr = Role.query.filter_by(name=MODERATOR).first()
+-        return list(set(Person.query.filter_by(roles=mr).all()) - set(self.moderators)) 
++        all = [m for m in Person.query.all() if mr in m.roles]
++        return list(set(all) - set(self.moderators)) 
+ 
+Index: src/dto.py
+===================================================================
+--- src/dto.py	(revision 159418)
++++ src/dto.py	(revision 159445)
+@@ -99,7 +99,7 @@
+                         surname=copy.surname,
+                         username=copy.username,
+                         password=copy.password,
+-                        roles=RoleDTO._clone(copy.roles),
++                        roles=RoleDTO._clones(copy.roles),
+                         events=EventDTO._clones(copy.events),
+                         manages=EventDTO._clones(copy.manages),
+                         attends=EventDTO._clones(copy.attends),
+@@ -120,7 +120,7 @@
+                 surname=RESTRICTED, 
+                 username=RESTRICTED, 
+                 password=RESTRICTED,
+-                roles=RESTRICTED,
++                roles=[],
+                 events=[],
+                 manages=[],
+                 attends=[],
+@@ -132,7 +132,7 @@
+         self.surname=surname
+         self.username=username
+         self.password=password
+-        self.roles=roles
++        self.roles=list(set(roles))
+         self.events=list(set(events))
+         for e in events:
+                 e.owner=self
+@@ -157,6 +157,12 @@
+                 if self not in c.moderators:
+                         c.moderators.append(self)
+     @property
++    def role(self):
++        return self.roles[0]
++    @role.setter
++    def role(self,r):
++        self.roles = [r]
++    @property
+     def fullname(self):
+         return f'{self.name} {self.surname}' 
+     @property
+Index: src/project.py
+===================================================================
+--- src/project.py	(revision 159418)
++++ src/project.py	(revision 159445)
+@@ -1,7 +1,7 @@
+-from flask import request, redirect, url_for
+-from flask_user import current_user, login_required
++from flask import request
++from flask_user import current_user
+ from model import db, Person, Role, Event, Category
+-from dto import RESTRICTED, PersonDTO, EventDTO, CategoryDTO, RoleDTO
++from dto import PersonDTO, EventDTO, CategoryDTO, RoleDTO
+ 
+ 
+ # Throw this exception when action is not authorized 
+@@ -15,6 +15,10 @@
+         self.params = params
+ 
+ 
++def on_identity_loaded(sender, identity):
++    pass
++
++
+ # Use in case you need to initialize something
+ def init():
+     pass
+@@ -34,7 +38,6 @@
+     subs=CategoryDTO.copies(current_user.subscriptions)
+     for s in subs:
+         for e in s.events:
+-            # e = RESTRICTED
+             e.owner = PersonDTO.copy(Event.query.get(e.id).owner)
+     return {'user' : user, 'subs' : subs}
+         
+@@ -202,7 +205,7 @@
+     user.name = name
+     user.surname = surname
+     role = Role.query.filter_by(name=role).first()
+-    user.roles = role
++    user.role = role
+     db.session.commit()
+     return id
+         
+Index: src/templates/edit_event.html
+===================================================================
+--- src/templates/edit_event.html	(revision 159418)
++++ src/templates/edit_event.html	(revision 159445)
+@@ -30,7 +30,7 @@
+         <label for="categories" class="form-label">Categories</label>
+         <select name="categories" id="categories" class="form-select" size="3" multiple>
+           {% for c in categories %}
+-            {% if c in event.categories %}
++            {% if c.id in event.categories | map(attribute='id') %}
+               <option style="width:100%;" value={{ c.id }} selected>{{ c.name }}</option>
+             {% else %}
+               <option style="width:100%;" value={{ c.id }}>{{ c.name }}</option>
+Index: src/templates/user.html
+===================================================================
+--- src/templates/user.html	(revision 159418)
++++ src/templates/user.html	(revision 159445)
+@@ -27,7 +27,7 @@
+          <label for="role" class="form-label">Role</label>
+          <select name="role" class="form-select">
+           {% for r in roles %}
+-            {% if r.name == user.roles.name %}
++            {% if r.name == user.role.name %}
+               <option value={{ r.name }} selected>{{ r.name }}</option>
+             {% else %}
+               <option value={{ r.name }}>{{ r.name }}</option>
+Index: requirements.txt
+===================================================================
+--- requirements.txt	(revision 159418)
++++ requirements.txt	(revision 159445)
+@@ -11,5 +11,6 @@
+ Flask-Cors==3.0.4
+ Flask-SQLAlchemy==2.5.1
+ Flask-User==1.0.2.2
++Flask-Principal==0.4.0
+ email_validator==1.3.0
+ oso==0.26.3
+Index: tests/templates/user.html
+===================================================================
+--- tests/templates/user.html	(revision 159418)
++++ tests/templates/user.html	(revision 159445)
+@@ -27,7 +27,7 @@
+          <label for="role" class="form-label">Role</label>
+          <select name="role" class="form-select">
+           {% for r in roles %}
+-            {% if r == user.roles %}
++            {% if r.name == user.role.name %}
+               <option value={{ r.name }} selected>{{ r.name }}</option>
+             {% else %}
+               <option value={{ r.name }}>{{ r.name }}</option>
+Index: tests/templates/edit_event.html
+===================================================================
+--- tests/templates/edit_event.html	(revision 159418)
++++ tests/templates/edit_event.html	(revision 159445)
+@@ -30,7 +30,7 @@
+         <label for="categories" class="form-label">Categories</label>
+         <select name="categories" id="categories" class="form-select" size="3" multiple>
+           {% for c in categories %}
+-            {% if c in event.categories %}
++            {% if c.id in event.categories | map(attribute='id') %}
+               <option style="width:100%;" value={{ c.id }} selected>{{ c.name }}</option>
+             {% else %}
+               <option style="width:100%;" value={{ c.id }}>{{ c.name }}</option>
+Index: tests/test_basic.py
+===================================================================
+--- tests/test_basic.py	(revision 159418)
++++ tests/test_basic.py	(revision 159445)
+@@ -16,7 +16,7 @@
+ # Test a user with FREEUSER role can access main()
+ def test_main_FREEUSER(app, request, user1, freeuserrole):
+     with current_app.test_request_context():
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         db.session.add(user1)
+         db.session.commit()
+         login_user(user1)
+@@ -28,7 +28,7 @@
+ # Test a user with PREMIUMUSER role can access main()
+ def test_main_PREMIUMUSER(app, request, user1, premiumuserrole):
+     with current_app.test_request_context():
+-        user1.roles = premiumuserrole
++        user1.role = premiumuserrole
+         db.session.add(user1)
+         db.session.commit()
+         login_user(user1)
+@@ -40,7 +40,7 @@
+ # Test a user with MODERATOR role can access main()
+ def test_main_MODERATOR(app, request, user1, moderatorrole):
+     with current_app.test_request_context():
+-        user1.roles = moderatorrole
++        user1.role = moderatorrole
+         db.session.add(user1)
+         db.session.commit()
+         login_user(user1)
+@@ -52,7 +52,7 @@
+ # Test a user with ADMIN role can access main()
+ def test_main_ADMIN(app, request, user1, adminrole):
+     with current_app.test_request_context():
+-        user1.roles = adminrole
++        user1.role = adminrole
+         db.session.add(user1)
+         db.session.commit()
+         login_user(user1)
+@@ -66,7 +66,7 @@
+ # Test a visitor cannot access profile()
+ def test_profile_VISITOR(app, request, user1, freeuserrole):
+     with current_app.test_request_context():
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         db.session.add(user1)
+         db.session.commit()
+         try:
+@@ -81,9 +81,9 @@
+ # can see the event title and owner in attendant list but not in the management list 
+ def test_profile_FREEUSER_0(app, request, user1, user2, freeuserrole, publicevent1):
+     with current_app.test_request_context():
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         db.session.add(user1)
+-        user2.roles = freeuserrole
++        user2.role = freeuserrole
+         db.session.add(user2)
+         publicevent1.attendants.append(user1)
+         publicevent1.owner = user2 
+@@ -109,9 +109,9 @@
+ # can see the event title and owner in attendant list and in the management list 
+ def test_profile_FREEUSER_1(app, request, user1, user2, freeuserrole, publicevent1):
+     with current_app.test_request_context():
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         db.session.add(user1)
+-        user2.roles = freeuserrole
++        user2.role = freeuserrole
+         db.session.add(user2)
+         publicevent1.attendants.append(user1)
+         publicevent1.managedBy.append(user1)
+@@ -141,7 +141,7 @@
+ # can see the event title and owner in attendant list and in the management list 
+ def test_profile_FREEUSER_2(app, request, user1, freeuserrole, publicevent1):
+     with current_app.test_request_context():
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         db.session.add(user1)
+         publicevent1.owner = user1 
+         publicevent1.attendants.append(user1)
+@@ -169,9 +169,9 @@
+ # can see the event title and owner in attendant list but not in the management list 
+ def test_profile_PREMIUM_3(app, request, user1, user2, privateevent1, premiumuserrole):
+     with current_app.test_request_context():
+-        user1.roles = premiumuserrole
++        user1.role = premiumuserrole
+         db.session.add(user1)
+-        user2.roles = premiumuserrole
++        user2.role = premiumuserrole
+         db.session.add(user2)
+         privateevent1.attendants.append(user1)
+         privateevent1.owner = user2 
+@@ -197,9 +197,9 @@
+ # can see the event title and owner in attendant list and in the management list 
+ def test_profile_PREMIUMUSER_4(app, request, user1, user2, privateevent1, premiumuserrole):
+     with current_app.test_request_context():
+-        user1.roles = premiumuserrole
++        user1.role = premiumuserrole
+         db.session.add(user1)
+-        user2.roles = premiumuserrole
++        user2.role = premiumuserrole
+         db.session.add(user2)
+         privateevent1.attendants.append(user1)
+         privateevent1.managedBy.append(user1)
+@@ -229,7 +229,7 @@
+ # can see the event title and owner in attendant list and in the management list 
+ def test_profile_PREMIUMUSER_5(app, request, user1, privateevent1, premiumuserrole):
+     with current_app.test_request_context():
+-        user1.roles = premiumuserrole
++        user1.role = premiumuserrole
+         db.session.add(user1)
+         privateevent1.owner = user1 
+         privateevent1.attendants.append(user1)
+@@ -257,9 +257,9 @@
+ # cannot see the event title and owner in attendant list or in the management list 
+ def test_profile_FREEUSER_6(app, request, user1, user2, freeuserrole, publicevent1):
+     with current_app.test_request_context():
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         db.session.add(user1)
+-        user2.roles = freeuserrole
++        user2.role = freeuserrole
+         db.session.add(user2)
+         publicevent1.owner = user2 
+         publicevent1.attendants.append(user2)
+@@ -282,10 +282,10 @@
+ def test_profile_FREEUSER_7(app, request, user1, user2, freeuserrole, publicevent1, category1):
+     with current_app.test_request_context():
+         db.session.add(category1)
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         user1.subscriptions.append(category1)
+         db.session.add(user1)
+-        user2.roles = freeuserrole
++        user2.role = freeuserrole
+         db.session.add(user2)
+         publicevent1.owner = user2 
+         publicevent1.attendants.append(user2)
+@@ -314,10 +314,10 @@
+ def test_profile_FREEUSER_8(app, request, user1, user2, freeuserrole, privateevent1, category1, premiumuserrole):
+     with current_app.test_request_context():
+         db.session.add(category1)
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         user1.subscriptions.append(category1)
+         db.session.add(user1)
+-        user2.roles = premiumuserrole
++        user2.role = premiumuserrole
+         db.session.add(user2)
+         privateevent1.owner = user2 
+         privateevent1.attendants.append(user2)
+@@ -346,10 +346,10 @@
+ def test_profile_PREMIUMUSER_9(app, request, user1, user2, privateevent1, category1, premiumuserrole):
+     with current_app.test_request_context():
+         db.session.add(category1)
+-        user1.roles = premiumuserrole
++        user1.role = premiumuserrole
+         user1.subscriptions.append(category1)
+         db.session.add(user1)
+-        user2.roles = premiumuserrole
++        user2.role = premiumuserrole
+         db.session.add(user2)
+         privateevent1.owner = user2 
+         privateevent1.attendants.append(user2)
+@@ -379,10 +379,10 @@
+ def test_profile_PREMIUMUSER_10(app, request, user1, user2, privateevent1, category1, premiumuserrole):
+     with current_app.test_request_context():
+         db.session.add(category1)
+-        user1.roles = premiumuserrole
++        user1.role = premiumuserrole
+         user1.subscriptions.append(category1)
+         db.session.add(user1)
+-        user2.roles = premiumuserrole
++        user2.role = premiumuserrole
+         db.session.add(user2)
+         privateevent1.owner = user2 
+         privateevent1.attendants.append(user2)
+@@ -413,7 +413,7 @@
+ def test_profile_PREMIUMUSER_11(app, request, user1, privateevent1, category1, premiumuserrole):
+     with current_app.test_request_context():
+         db.session.add(category1)
+-        user1.roles = premiumuserrole
++        user1.role = premiumuserrole
+         user1.subscriptions.append(category1)
+         db.session.add(user1)
+         privateevent1.owner = user1
+Index: tests/test_advanced.py
+===================================================================
+--- tests/test_advanced.py	(revision 159418)
++++ tests/test_advanced.py	(revision 159445)
+@@ -1,3 +1,8 @@
++from flask import current_app
++from flask_login import login_user
++from model import db
++from project import events
++
+ #def test_events_VISITOR_1(app, request, publicevent1, user1):
+ #    with current_app.test_request_context():
+ #        db.session.add(user1)
+@@ -30,19 +35,19 @@
+ 
+ #def test_profile_PREMIUMUSER(app, request, user1, premiumuserrole):
+ #    with current_app.test_request_context():
+-#        user1.roles = premiumuserrole
++#        user1.role = premiumuserrole
+ #        login_user(user1)
+ #        profile()
+ 
+ #def test_profile_MODERATOR(app, request, user1, moderatorrole):
+ #    with current_app.test_request_context():
+-#        user1.roles = moderatorrole
++#        user1.role = moderatorrole
+ #        login_user(user1)
+ #        profile()
+ 
+ #def test_profile_ADMIN(app, request, user1, adminrole):
+ #    with current_app.test_request_context():
+-#        user1.roles = adminrole
++#        user1.role = adminrole
+ #        login_user(user1)
+ #        profile()
+ 
+@@ -52,25 +57,25 @@
+         
+ #def test_events_FREEUSER(app, request, user1, freeuserrole):
+ #    with current_app.test_request_context():
+-#        user1.roles = freeuserrole
++#        user1.role = freeuserrole
+ #        login_user(user1)
+ #        events()
+ 
+ #def test_events_PREMIUMUSER(app, request, user1, premiumuserrole):
+ #    with current_app.test_request_context():
+-#        user1.roles = premiumuserrole
++#        user1.role = premiumuserrole
+ #        login_user(user1)
+ #        events()
+ 
+ #def test_events_MODERATOR(app, request, user1, moderatorrole):
+ #    with current_app.test_request_context():
+-#        user1.roles = moderatorrole
++#        user1.role = moderatorrole
+ #        login_user(user1)
+ #        events()
+ 
+ #def test_events_ADMIN(app, request, user1, adminrole):
+ #    with current_app.test_request_context():
+-#        user1.roles = adminrole
++#        user1.role = adminrole
+ #        login_user(user1)
+ #        events()
+ 
+@@ -86,7 +91,7 @@
+ #        event1.private = False
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = freeuserrole
++#        user1.role = freeuserrole
+ #        login_user(user1)
+ #        view_event(event1.id)
+ 
+@@ -95,7 +100,7 @@
+ #        event1.private = True
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = freeuserrole
++#        user1.role = freeuserrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            view_event(event1.id)
+@@ -105,7 +110,7 @@
+ #        event1.private = False
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = premiumuserrole
++#        user1.role = premiumuserrole
+ #        login_user(user1)
+ #        view_event(event1.id)
+ 
+@@ -114,7 +119,7 @@
+ #        event1.private = True
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = premiumuserrole
++#        user1.role = premiumuserrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            view_event(event1.id)
+@@ -124,7 +129,7 @@
+ #        event1.private = False
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = moderatorrole
++#        user1.role = moderatorrole
+ #        login_user(user1)
+ #        view_event(event1.id)
+ 
+@@ -133,7 +138,7 @@
+ #        event1.private = True
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = moderatorrole
++#        user1.role = moderatorrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            view_event(event1.id)
+@@ -143,7 +148,7 @@
+ #        event1.private = False
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = adminrole
++#        user1.role = adminrole
+ #        login_user(user1)
+ #        view_event(event1.id)
+ 
+@@ -152,7 +157,7 @@
+ #        event1.private = True
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = adminrole
++#        user1.role = adminrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            view_event(event1.id)
+@@ -169,7 +174,7 @@
+ #        event1.private = False
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = freeuserrole
++#        user1.role = freeuserrole
+ #        login_user(user1)
+ #        edit_event(event1.id)
+ 
+@@ -178,7 +183,7 @@
+ #        event1.private = True
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = freeuserrole
++#        user1.role = freeuserrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            edit_event(event1.id)
+@@ -188,7 +193,7 @@
+ #        event1.private = False
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = premiumuserrole
++#        user1.role = premiumuserrole
+ #        login_user(user1)
+ #        edit_event(event1.id)
+ 
+@@ -197,7 +202,7 @@
+ #        event1.private = True
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = premiumuserrole
++#        user1.role = premiumuserrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            edit_event(event1.id)
+@@ -207,7 +212,7 @@
+ #        event1.private = False
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = moderatorrole
++#        user1.role = moderatorrole
+ #        login_user(user1)
+ #        edit_event(event1.id)
+ 
+@@ -216,7 +221,7 @@
+ #        event1.private = True
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = moderatorrole
++#        user1.role = moderatorrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            edit_event(event1.id)
+@@ -226,7 +231,7 @@
+ #        event1.private = False
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = adminrole
++#        user1.role = adminrole
+ #        login_user(user1)
+ #        edit_event(event1.id)
+ 
+@@ -235,7 +240,7 @@
+ #        event1.private = True
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = adminrole
++#        user1.role = adminrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            edit_event(event1.id)
+@@ -248,7 +253,7 @@
+ #    with current_app.test_request_context(data={"id": event1.id, "title": "doesnt matter", "description": "doesnt matter", "categories": []}):
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = freeuserrole
++#        user1.role = freeuserrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            update_event()
+@@ -258,7 +263,7 @@
+ #        event1.managedBy.append(user1)
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = freeuserrole
++#        user1.role = freeuserrole
+ #        login_user(user1)
+ #        update_event()
+ 
+@@ -266,7 +271,7 @@
+ #    with current_app.test_request_context(data={"id": event1.id, "title": "doesnt matter", "description": "doesnt matter", "categories": []}):
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = premiumuserrole
++#        user1.role = premiumuserrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            update_event()
+@@ -276,7 +281,7 @@
+ #        event1.managedBy.append(user1)
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = premiumuserrole
++#        user1.role = premiumuserrole
+ #        login_user(user1)
+ #        update_event()
+ 
+@@ -284,7 +289,7 @@
+ #    with current_app.test_request_context(data={"id": event1.id, "title": "doesnt matter", "description": "doesnt matter", "categories": []}):
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = moderatorrole
++#        user1.role = moderatorrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            update_event()
+@@ -294,7 +299,7 @@
+ #        event1.managedBy.append(user1)
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = moderatorrole
++#        user1.role = moderatorrole
+ #        login_user(user1)
+ #        update_event()
+ 
+@@ -302,7 +307,7 @@
+ #    with current_app.test_request_context(data={"id": event1.id, "title": "doesnt matter", "description": "doesnt matter", "categories": []}):
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = adminrole
++#        user1.role = adminrole
+ #        login_user(user1)
+ #        with pytest.raises(SecurityException) as se:
+ #            update_event()
+@@ -312,7 +317,7 @@
+ #        event1.managedBy.append(user1)
+ #        db.session.add(event1)
+ #        db.session.commit()
+-#        user1.roles = adminrole
++#        user1.role = adminrole
+ #        login_user(user1)
+ #        update_event()
+ 
+@@ -320,7 +325,7 @@
+ 
+ def test_events_VISITOR_1(app, request, publicevent1, user1, freeuserrole):
+     with current_app.test_request_context():
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         db.session.add(user1)
+         publicevent1.owner = user1
+         publicevent1.attendants.append(user1)
+@@ -337,7 +342,7 @@
+ 
+ def test_events_VISITOR_2(app, request, privateevent1, user1, premiumuserrole):
+     with current_app.test_request_context():
+-        user1.roles = premiumuserrole
++        user1.role = premiumuserrole
+         db.session.add(user1)
+         privateevent1.owner = user1
+         privateevent1.attendants.append(user1)
+@@ -353,9 +358,9 @@
+ 
+ def test_events_FREEUSER_1(app, request, publicevent1, user1, user2, freeuserrole):
+     with current_app.test_request_context():
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         db.session.add(user1)
+-        user2.roles = freeuserrole
++        user2.role = freeuserrole
+         db.session.add(user2)
+         publicevent1.owner = user2 
+         publicevent1.attendants.append(user2)
+@@ -372,9 +377,9 @@
+ 
+ def test_events_FREEUSER_2(app, request, privateevent1, user1, user2, freeuserrole, premiumuserrole):
+     with current_app.test_request_context():
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         db.session.add(user1)
+-        user2.roles = premiumuserrole
++        user2.role = premiumuserrole
+         db.session.add(user2)
+         privateevent1.owner = user2 
+         privateevent1.attendants.append(user2)
+@@ -391,9 +396,9 @@
+ 
+ def test_events_FREEUSER_3(app, request, privateevent1, user1, user2, freeuserrole, premiumuserrole):
+     with current_app.test_request_context():
+-        user1.roles = freeuserrole
++        user1.role = freeuserrole
+         db.session.add(user1)
+-        user2.roles = premiumuserrole
++        user2.role = premiumuserrole
+         db.session.add(user2)
+         privateevent1.owner = user2 
+         privateevent1.attendants.append(user2)
+@@ -411,7 +416,7 @@
+ 
+ def test_events_FREEUSER_4(app, request, privateevent1, user1, premiumuserrole):
+     with current_app.test_request_context():
+-        user1.roles = premiumuserrole
++        user1.role = premiumuserrole
+         db.session.add(user1)
+         privateevent1.owner = user1
+         privateevent1.managedBy.append(user1)

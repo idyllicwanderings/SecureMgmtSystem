@@ -1,0 +1,150 @@
+Window EventListWindow {
+    Label Events_L {
+        String text := ['Events:']
+    }
+    Table Table_T {
+        Set(Event) rows := [Event.allInstances()]
+        Event selected  := [null]
+        columns {
+            ['Title'] : Label title {
+                event onView (text) {
+                    try {
+                        text := [$Table_T.row$.title]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+            ['Owner'] : Label own {
+                event onView (text) {
+                    try {
+                        text := [$Table_T.row$.owner.name.concat(' ').concat($Table_T.row$.owner.surname)]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+    Button View_B {
+        String text:= ['View Event']
+        String probe1
+        Set(Category) probe2
+        event onClick {
+            if [(not $Table_T.selected$.oclIsUndefined())] {
+                try {
+                    probe1 := [$Table_T.selected$.title]
+                    probe1 := [$Table_T.selected$.description]
+                    probe2 := [$Table_T.selected$.categories]
+                    open EventViewWindow(caller:[$EventListWindow.caller$], role:[$EventListWindow.role$], entity:[$Table_T.selected$])
+                    
+                } catch (SecurityException) {
+                    notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Nothing selected'],[500])
+            }
+        }
+    }
+    Button Join_B {
+        String text:= ['Join']
+        event onClick {
+            if [(not $Table_T.selected$.oclIsUndefined())] {
+                try {
+                    if [ (not $EventListWindow.caller$.attends->includes($Table_T.selected$))] {
+                        if [ (not $EventListWindow.caller$.requests->includes($Table_T.selected$))] {
+                            [$EventListWindow.caller$.requests] += [$Table_T.selected$]
+                            notification(['Success'],['Requested to join'],[500])
+                        } else {
+                            notification(['Error'],['Already requested to join'],[500])
+                        }
+                    } else {
+                        notification(['Error'],['Already attending'],[500])
+                    }
+                } catch (SecurityException) {
+                    notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Nothing selected'],[500])
+            }
+        }
+    }
+    Label Title_L {
+        String text:= ['Title']
+    }
+    TextField Title_TF {
+        String text:= [null]
+    }
+    Label Description_L {
+        String text:= ['Description']
+    }
+    TextField Description_TF {
+        String text := [null]
+    }
+    BooleanField Private_BF {
+        Boolean value := [false]
+        String text := ['Private event']
+    }
+    Label Category_L {
+        String text:= ['Categories']
+    }
+    Table Table_Category_T {
+        Set(Category) rows := [Category.allInstances()]
+        Set(Category) selected  := [Set{}]
+        columns {
+            ['Name'] : Label name {
+                event onView (text) {
+                    try {
+                        text := [$Table_Category_T.row$.name]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+    Button Create_B {
+        String text := ['Create']
+        event onClick {
+            if [(not $Title_TF.text$.oclIsUndefined()) and
+                (not ($Title_TF.text$.size()=0)) and
+                (not $Description_TF.text$.oclIsUndefined()) and
+                (not ($Description_TF.text$.size()=0)) and
+                (not $Table_Category_T.selected$->oclIsUndefined())] {
+                try {
+                    newEvent := new Event
+                    [$newEvent$.owner] := [$EventListWindow.caller$]
+                    [$newEvent$.managedBy] += [$EventListWindow.caller$]
+                    [$newEvent$.attendants] += [$EventListWindow.caller$]
+
+                    [$newEvent$.private] := [$Private_BF.value$]
+                    [$newEvent$.title] := [$Title_TF.text$]
+                    [$newEvent$.description] := [$Description_TF.text$]
+                    foreach cat in [$Table_Category_T.selected$] {
+                        [$newEvent$.categories] += [$cat$]
+                    }
+
+                    notification(['Success'],['Event created'],[500])
+
+                    Title_TF.text:=[null]
+                    Description_TF.text:=[null]
+                    Private_BF.value:=[false]
+                    Table_Category_T.selected:=[Set{}]
+                    Table_T.rows:=[null]
+                    reevaluate Table_T.rows
+
+                } catch (SecurityException) {
+                    notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Form contains errors.'],[500])
+            }
+        }
+    }
+    Button Back_B {
+        String text := ['Back']
+        event onClick {
+            back
+        }
+    }
+}

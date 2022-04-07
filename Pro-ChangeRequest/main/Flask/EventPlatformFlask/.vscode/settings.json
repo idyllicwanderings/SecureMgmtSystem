@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "cassert": "cpp",
+        "__tree": "cpp"
+    }
+}

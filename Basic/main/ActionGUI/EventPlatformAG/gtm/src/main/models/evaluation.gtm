@@ -1,0 +1,1068 @@
+Window EvaluationWindow {
+
+   Button TestData_B {
+        String text := ['CLEAR DATABASE and Set up Test Data']
+
+        event onClick {
+
+            foreach p in [Person.allInstances()] {
+                delete [$p$]
+            }
+
+            foreach e in [Event.allInstances()] {
+                delete [$e$]
+            }
+
+            foreach c in [Category.allInstances()] {
+                delete [$c$]
+            }
+
+            // Set up test data
+            // *******************
+            // SIMPLE INIT DATA
+            // *******************
+
+            freshUser1 := new Person
+            [$freshUser1$.name]:=['fresh1']
+
+            freshUser2 := new Person
+            [$freshUser2$.name]:=['fresh2']
+
+            freshUser3 := new Person
+            [$freshUser3$.name]:=['fresh3']
+
+            freeUser1 := new Person
+            [$freeUser1$.name]:=['free1']
+            [$freeUser1$.surname]:=['free1']
+            [$freeUser1$.username]:=['free1']
+            [$freeUser1$.password]:=['free1']
+            [$freeUser1$.role]:=[Role::FREEUSER]
+
+            freeUser2 := new Person
+            [$freeUser2$.name]:=['free2']
+            [$freeUser2$.surname]:=['free2']
+            [$freeUser2$.username]:=['free2']
+            [$freeUser2$.password]:=['free2']
+            [$freeUser2$.role]:=[Role::FREEUSER]
+
+            freeUser3 := new Person
+            [$freeUser3$.name]:=['free3']
+            [$freeUser3$.surname]:=['free3']
+            [$freeUser3$.username]:=['free3']
+            [$freeUser3$.password]:=['free3']
+            [$freeUser3$.role]:=[Role::FREEUSER]
+
+            freeUser4 := new Person
+            [$freeUser4$.name]:=['free4']
+            [$freeUser4$.surname]:=['free4']
+            [$freeUser4$.username]:=['free4']
+            [$freeUser4$.password]:=['free4']
+            [$freeUser4$.role]:=[Role::FREEUSER]
+
+            person := new Person
+            [$person$.name]:=['person']
+            [$person$.surname]:=['person']
+            [$person$.username]:=['person']
+            [$person$.password]:=['person']
+            [$person$.role]:=[Role::PREMIUMUSER]
+
+            category := new Category
+            [$category$.name] := ['category']
+
+            public := new Event
+            [$person$.events]+=[$public$]
+            [$person$.manages]+=[$public$]
+            [$person$.attends]+=[$public$]
+            [$public$.private] := [false]
+            [$public$.title] := ['public']
+            [$public$.description] := ['public']
+            [$public$.categories] += [$category$]
+
+            private := new Event
+            [$person$.events]+=[$private$]
+            [$person$.manages]+=[$private$]
+            [$person$.attends]+=[$private$]
+            [$private$.private] := [true]
+            [$private$.title] := ['private']
+            [$private$.description] := ['private']
+            [$private$.categories] += [$category$]
+
+
+            // *******************
+            // USERS
+            // *******************
+
+            visitor := new Person
+            [$visitor$.name]:=['']
+            [$visitor$.surname]:=['']
+            [$visitor$.username]:=['']
+            [$visitor$.password]:=['']
+            [$visitor$.role]:=[Role::VISITOR]
+ 
+
+            testFreeUser := new Person
+            [$testFreeUser$.name]:=['Free']
+            [$testFreeUser$.surname]:=['F']
+            [$testFreeUser$.username]:=['free']
+            [$testFreeUser$.password]:=['fr33']
+            [$testFreeUser$.role]:=[Role::FREEUSER]
+
+            otherFreeUser := new Person
+            [$otherFreeUser$.name]:=['Alice']
+            [$otherFreeUser$.surname]:=['A']
+            [$otherFreeUser$.username]:=['alice']
+            [$otherFreeUser$.password]:=['4l1c3']
+            [$otherFreeUser$.role]:=[Role::FREEUSER]
+
+
+            testPremiumUser := new Person
+            [$testPremiumUser$.name]:=['Premium']
+            [$testPremiumUser$.surname]:=['P']
+            [$testPremiumUser$.username]:=['premium']
+            [$testPremiumUser$.password]:=['pr3m1um']
+            [$testPremiumUser$.role]:=[Role::PREMIUMUSER]
+
+            testPremiumUser2 := new Person
+            [$testPremiumUser2$.name]:=['Premium2']
+            [$testPremiumUser2$.surname]:=['P2']
+            [$testPremiumUser2$.username]:=['premium2']
+            [$testPremiumUser2$.password]:=['pr3m1um2']
+            [$testPremiumUser2$.role]:=[Role::PREMIUMUSER]            
+
+            testModerator := new Person
+            [$testModerator$.name]:=['Moderator']
+            [$testModerator$.surname]:=['M']
+            [$testModerator$.username]:=['moderator']
+            [$testModerator$.password]:=['m0d3r4t0r']
+            [$testModerator$.role]:=[Role::MODERATOR]
+
+
+            testOtherModerator := new Person
+            [$testOtherModerator$.name]:=['Moderator2']
+            [$testOtherModerator$.surname]:=['M2']
+            [$testOtherModerator$.username]:=['moderator2']
+            [$testOtherModerator$.password]:=['m0d3r4t0r']
+            [$testOtherModerator$.role]:=[Role::MODERATOR]
+
+
+            testAdmin := new Person
+            [$testAdmin$.name]:=['Admin']
+            [$testAdmin$.surname]:=['A']
+            [$testAdmin$.username]:=['admin']
+            [$testAdmin$.password]:=['4dm1n']
+            [$testAdmin$.role]:=[Role::ADMIN]   
+
+            // *******************
+            // CATEGORIES
+            // *******************
+
+            testCategoryOne := new Category
+            [$testCategoryOne$.name] := ['Category1']
+            [$testCategoryOne$.moderators] += [$testModerator$]
+            [$testCategoryOne$.subscribers] += [$testPremiumUser$]
+            [$testCategoryOne$.subscribers] += [$testModerator$]
+            [$testCategoryOne$.subscribers] += [$testAdmin$]
+
+            testCategoryTwo := new Category
+            [$testCategoryTwo$.name] := ['Category2']
+            [$testCategoryTwo$.moderators] += [$testOtherModerator$]
+
+            testCategoryThree := new Category
+            [$testCategoryThree$.name] := ['Category3']
+            [$testCategoryThree$.moderators] += [$testModerator$]  
+
+
+            //******************
+            // EVENTS
+            //******************
+
+
+            // FREE USER
+
+            //Free user owns this event
+            freeUserEvent := new Event
+            [$testFreeUser$.events]+=[$freeUserEvent$]
+            [$testFreeUser$.manages]+=[$freeUserEvent$]
+            [$testFreeUser$.attends]+=[$freeUserEvent$]
+            [$freeUserEvent$.private] := [false]
+            [$freeUserEvent$.title] := ['Event1']
+            [$freeUserEvent$.description] := ['Desc']
+            [$freeUserEvent$.categories] += [$testCategoryOne$]
+
+            //Other user attends this event
+
+            [$otherFreeUser$.attends]+=[$freeUserEvent$]
+
+            //Free user owns this event, other manages
+
+            freeUserEvent2 := new Event
+            [$testFreeUser$.events]+=[$freeUserEvent2$]
+            [$testFreeUser$.manages]+=[$freeUserEvent2$]
+            [$testFreeUser$.attends]+=[$freeUserEvent2$]
+            [$freeUserEvent2$.private] := [false]
+            [$freeUserEvent2$.title] := ['Event2']
+            [$freeUserEvent2$.description] := ['Desc']
+            [$freeUserEvent2$.categories] += [$testCategoryOne$]
+
+            //Other user attends this event
+
+            [$otherFreeUser$.manages]+=[$freeUserEvent2$]      
+            [$otherFreeUser$.attends]+=[$freeUserEvent2$]      
+
+            //Free user owns this event, other requests
+
+            freeUserEvent3 := new Event
+            [$testFreeUser$.events]+=[$freeUserEvent3$]
+            [$testFreeUser$.manages]+=[$freeUserEvent3$]
+            [$testFreeUser$.attends]+=[$freeUserEvent3$]
+            [$freeUserEvent3$.private] := [false]
+            [$freeUserEvent3$.title] := ['Event3']
+            [$freeUserEvent3$.description] := ['Desc']
+            [$freeUserEvent3$.categories] += [$testCategoryOne$]
+
+            //Other user requests to attend this event
+
+            [$freeUserEvent3$.requesters]+=[$otherFreeUser$]     
+
+            //Moderator request to attend this event
+
+            [$freeUserEvent3$.requesters]+=[$testModerator$]
+
+            //Admin request to attend this event
+
+            [$freeUserEvent3$.requesters]+=[$testAdmin$]                                
+
+
+            //Free user owns this event
+    
+            freeUserEvent4 := new Event
+            [$testFreeUser$.events]+=[$freeUserEvent4$]
+            [$testFreeUser$.manages]+=[$freeUserEvent4$]
+            [$testFreeUser$.attends]+=[$freeUserEvent4$]
+            [$freeUserEvent4$.private] := [false]
+            [$freeUserEvent4$.title] := ['Event4']
+            [$freeUserEvent4$.description] := ['Desc']
+            [$freeUserEvent4$.categories] += [$testCategoryOne$]
+
+            // OTHER FREE
+            //Other Free user owns this event
+
+            otherFreeUserEvent := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent$]
+            [$otherFreeUserEvent$.private] := [false]
+            [$otherFreeUserEvent$.title] := ['Event1 other']
+            [$otherFreeUserEvent$.description] := ['Desc']
+            [$otherFreeUserEvent$.categories] += [$testCategoryOne$]
+
+            //Free user attends this event
+
+            [$testFreeUser$.attends]+=[$otherFreeUserEvent$]
+
+
+            //Other Free user second event
+
+            otherFreeUserEvent2 := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent2$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent2$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent2$]
+            [$otherFreeUserEvent2$.private] := [false]
+            [$otherFreeUserEvent2$.title] := ['Event2 other']
+            [$otherFreeUserEvent2$.description] := ['Desc']
+            [$otherFreeUserEvent2$.categories] += [$testCategoryOne$]
+           //Other Free user third event, free user is manager
+
+            otherFreeUserEvent3 := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent3$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent3$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent3$]
+            [$otherFreeUserEvent3$.private] := [false]
+            [$otherFreeUserEvent3$.title] := ['Event3 other']
+            [$otherFreeUserEvent3$.description] := ['Desc']
+            [$otherFreeUserEvent3$.categories] += [$testCategoryOne$]
+
+            //free user manages and attends
+
+            [$testFreeUser$.manages]+=[$otherFreeUserEvent3$]   
+            [$testFreeUser$.attends]+=[$otherFreeUserEvent3$]   
+            
+            //premium user manages
+
+            [$testPremiumUser$.manages]+=[$otherFreeUserEvent3$]                
+            [$testPremiumUser$.attends]+=[$otherFreeUserEvent3$]                
+
+            //Moderator requests to attend
+
+            [$testModerator$.requests] += [$otherFreeUserEvent3$]   
+
+            //otherPremium requests to attend
+
+            [$testPremiumUser2$.requests] += [$otherFreeUserEvent3$]
+
+            //admin requests to attend
+            
+            [$testAdmin$.requests] += [$otherFreeUserEvent3$]                
+
+            //Other Free user fourth event, free user requests to attend
+
+            otherFreeUserEvent4 := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent4$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent4$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent4$]
+            [$otherFreeUserEvent4$.private] := [false]
+            [$otherFreeUserEvent4$.title] := ['Event4 other']
+            [$otherFreeUserEvent4$.description] := ['Desc']
+            [$otherFreeUserEvent4$.categories] += [$testCategoryOne$]
+
+            //Free user requests to attend
+
+            [$testFreeUser$.requests] += [$otherFreeUserEvent4$]   
+
+            //premium user manages
+
+            [$testPremiumUser$.manages]+=[$otherFreeUserEvent4$]   
+            [$testPremiumUser$.attends]+=[$otherFreeUserEvent4$]   
+
+            //Moderator manages
+            [$testModerator$.manages]+=[$otherFreeUserEvent4$]  
+            [$testModerator$.attends]+=[$otherFreeUserEvent4$]  
+
+            //Admin manages
+            [$testAdmin$.manages]+=[$otherFreeUserEvent4$]                        
+            [$testAdmin$.attends]+=[$otherFreeUserEvent4$]                        
+
+            //other premium user attends
+
+            [$testPremiumUser2$.attends] += [$otherFreeUserEvent4$]
+
+            //Other Free user fifth event, free user manages, premium user requests to attend
+
+            otherFreeUserEvent5 := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent5$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent5$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent5$]
+            [$otherFreeUserEvent5$.private] := [false]
+            [$otherFreeUserEvent5$.title] := ['Event5 other']
+            [$otherFreeUserEvent5$.description] := ['Desc']
+            [$otherFreeUserEvent5$.categories] += [$testCategoryOne$]
+
+            //Premium user requests to attend
+
+            [$testPremiumUser$.requests] += [$otherFreeUserEvent5$]      
+
+            //free user manages
+
+            [$testFreeUser$.manages]+=[$otherFreeUserEvent5$]  
+            [$testFreeUser$.attends]+=[$otherFreeUserEvent5$]  
+
+            //Moderator manages
+            [$testModerator$.manages]+=[$otherFreeUserEvent5$]    
+            [$testModerator$.attends]+=[$otherFreeUserEvent5$]    
+
+            //Admin manages
+            [$testAdmin$.manages]+=[$otherFreeUserEvent5$]    
+            [$testAdmin$.attends]+=[$otherFreeUserEvent5$]    
+
+            //Other Free user sixth event, free user attends
+
+            otherFreeUserEvent6 := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent6$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent6$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent6$]
+            [$otherFreeUserEvent6$.private] := [false]
+            [$otherFreeUserEvent6$.title] := ['Event6 other']
+            [$otherFreeUserEvent6$.description] := ['Desc']
+            [$otherFreeUserEvent6$.categories] += [$testCategoryOne$]
+
+            //Free user attends
+
+            [$testFreeUser$.attends]+=[$otherFreeUserEvent6$]        
+
+            //Premium user attends
+
+            [$testPremiumUser$.attends]+=[$otherFreeUserEvent6$]    
+
+            //Moderator attends
+
+            [$testModerator$.attends]+=[$otherFreeUserEvent6$]     
+
+            //Admin attends
+
+            [$testAdmin$.attends]+=[$otherFreeUserEvent6$]                             
+
+            //Other Free user seventh event, free user manages, premium user attends
+
+            otherFreeUserEvent7 := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent7$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent7$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent7$]
+            [$otherFreeUserEvent7$.private] := [false]
+            [$otherFreeUserEvent7$.title] := ['Event7 other']
+            [$otherFreeUserEvent7$.description] := ['Desc']
+            [$otherFreeUserEvent7$.categories] += [$testCategoryOne$]
+
+            //Premium user attends
+
+            [$testPremiumUser$.attends] += [$otherFreeUserEvent7$]      
+
+            //free user manages
+
+            [$testFreeUser$.manages]+=[$otherFreeUserEvent7$]      
+            [$testFreeUser$.attends]+=[$otherFreeUserEvent7$]      
+
+
+            //Other Free user eigth event, premium user attends
+
+            otherFreeUserEvent8 := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent8$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent8$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent8$]
+            [$otherFreeUserEvent8$.private] := [false]
+            [$otherFreeUserEvent8$.title] := ['Event8 other']
+            [$otherFreeUserEvent8$.description] := ['Desc']
+            [$otherFreeUserEvent8$.categories] += [$testCategoryOne$]
+
+            //Premium user attends
+
+            [$testPremiumUser$.attends] += [$otherFreeUserEvent8$]   
+
+
+            //Other Free user ninth event, premium user requests
+
+            otherFreeUserEvent9 := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent9$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent9$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent9$]
+            [$otherFreeUserEvent9$.private] := [false]
+            [$otherFreeUserEvent9$.title] := ['Event9 other']
+            [$otherFreeUserEvent9$.description] := ['Desc']
+            [$otherFreeUserEvent9$.categories] += [$testCategoryOne$]
+
+            //Premium user requests
+
+            [$testPremiumUser$.requests] += [$otherFreeUserEvent9$]  
+
+            //Moderator user requests
+
+            [$testModerator$.requests] += [$otherFreeUserEvent9$] 
+
+            //Other Premium user requests
+
+            [$testPremiumUser2$.requests] += [$otherFreeUserEvent9$]       
+
+            //Admin user requests
+
+            [$testAdmin$.requests] += [$otherFreeUserEvent9$]  
+
+
+            //Other Free user tenth event, free user requests
+
+            otherFreeUserEvent10 := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent10$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent10$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent10$]
+            [$otherFreeUserEvent10$.private] := [false]
+            [$otherFreeUserEvent10$.title] := ['Event10 other']
+            [$otherFreeUserEvent10$.description] := ['Desc']
+            [$otherFreeUserEvent10$.categories] += [$testCategoryOne$]
+
+            //free user requests
+
+            [$testFreeUser$.requests] += [$otherFreeUserEvent10$]    
+
+
+            //Other Free user eleventh event
+
+            otherFreeUserEvent11 := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent11$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent11$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent11$]
+            [$otherFreeUserEvent11$.private] := [false]
+            [$otherFreeUserEvent11$.title] := ['Event11 other']
+            [$otherFreeUserEvent11$.description] := ['Desc']
+            [$otherFreeUserEvent11$.categories] += [$testCategoryTwo$]
+
+
+            //Other Free user twelvth event
+
+            otherFreeUserEvent12 := new Event
+            [$otherFreeUser$.events]+=[$otherFreeUserEvent12$]
+            [$otherFreeUser$.manages]+=[$otherFreeUserEvent12$]
+            [$otherFreeUser$.attends]+=[$otherFreeUserEvent12$]
+            [$otherFreeUserEvent12$.private] := [false]
+            [$otherFreeUserEvent12$.title] := ['Event12 other']
+            [$otherFreeUserEvent12$.description] := ['Desc']
+            [$otherFreeUserEvent12$.categories] += [$testCategoryOne$]
+
+            //Moderator manages
+            [$testModerator$.manages]+=[$otherFreeUserEvent12$]
+            [$testModerator$.attends]+=[$otherFreeUserEvent12$]
+
+            //Admin manages
+            [$testAdmin$.manages]+=[$otherFreeUserEvent12$]            
+            [$testAdmin$.attends]+=[$otherFreeUserEvent12$]            
+
+
+            // PREMIUM
+            //Premium user private event
+
+            premiumPrivateEvent := new Event
+            [$testPremiumUser$.events]+=[$premiumPrivateEvent$]
+            [$testPremiumUser$.manages]+=[$premiumPrivateEvent$]
+            [$testPremiumUser$.attends]+=[$premiumPrivateEvent$]
+            [$premiumPrivateEvent$.title] := ['Event1 premium private']
+            [$premiumPrivateEvent$.private] := [true]
+            [$premiumPrivateEvent$.description] := ['Desc']
+            [$premiumPrivateEvent$.categories] += [$testCategoryOne$]
+
+
+
+            //Premium user public event
+
+            premiumPublicEvent := new Event
+            [$testPremiumUser$.events]+=[$premiumPublicEvent$]
+            [$testPremiumUser$.manages]+=[$premiumPublicEvent$]
+            [$testPremiumUser$.attends]+=[$premiumPublicEvent$]
+            [$premiumPublicEvent$.title] := ['Event1 premium public']
+            [$premiumPublicEvent$.private] := [false]
+            [$premiumPublicEvent$.description] := ['Desc']
+            [$premiumPublicEvent$.categories] += [$testCategoryOne$]
+
+            //Other user attends this event
+
+            [$otherFreeUser$.attends]+=[$premiumPublicEvent$]
+
+
+            //Premium user public event 2
+
+            premiumPublicEvent2 := new Event
+            [$testPremiumUser$.events]+=[$premiumPublicEvent2$]
+            [$testPremiumUser$.manages]+=[$premiumPublicEvent2$]
+            [$testPremiumUser$.attends]+=[$premiumPublicEvent2$]
+            [$premiumPublicEvent2$.title] := ['Event2 premium public']
+            [$premiumPublicEvent2$.private] := [false]
+            [$premiumPublicEvent2$.description] := ['Desc']
+            [$premiumPublicEvent2$.categories] += [$testCategoryOne$]
+
+            //Other user requests to attend this event
+
+            [$otherFreeUser$.requests]+=[$premiumPublicEvent2$]
+
+            //Moderator requests to attend this event
+
+            [$testModerator$.requests]+=[$premiumPublicEvent2$]            
+
+            //Premium user private event free user attends
+
+            premiumPrivateEvent2 := new Event
+            [$testPremiumUser$.events]+=[$premiumPrivateEvent2$]
+            [$testPremiumUser$.manages]+=[$premiumPrivateEvent2$]
+            [$testPremiumUser$.attends]+=[$premiumPrivateEvent2$]
+            [$premiumPrivateEvent2$.title] := ['Event2 premium private']
+            [$premiumPrivateEvent2$.private] := [true]
+            [$premiumPrivateEvent2$.description] := ['Desc']
+            [$premiumPrivateEvent2$.categories] += [$testCategoryOne$]
+
+            //Other user attends this event
+
+            [$testFreeUser$.attends]+=[$premiumPrivateEvent2$]      
+
+
+            //Premium user private event 
+
+            premiumPrivateEvent3 := new Event
+            [$testPremiumUser$.events]+=[$premiumPrivateEvent3$]
+            [$testPremiumUser$.manages]+=[$premiumPrivateEvent3$]
+            [$testPremiumUser$.attends]+=[$premiumPrivateEvent3$]
+            [$premiumPrivateEvent3$.title] := ['Event3 premium private']
+            [$premiumPrivateEvent3$.private] := [true]
+            [$premiumPrivateEvent3$.description] := ['Desc']
+            [$premiumPrivateEvent3$.categories] += [$testCategoryOne$]
+
+           //Other free user manages
+
+            [$otherFreeUser$.manages]+=[$premiumPrivateEvent3$]
+            [$otherFreeUser$.attends]+=[$premiumPrivateEvent3$]
+
+            // OTHER PREMUM
+            //Premium user private event other
+
+            premiumPrivateEventOther := new Event
+            [$testPremiumUser2$.events]+=[$premiumPrivateEventOther$]
+            [$testPremiumUser2$.manages]+=[$premiumPrivateEventOther$]
+            [$testPremiumUser2$.attends]+=[$premiumPrivateEventOther$]
+            [$premiumPrivateEventOther$.title] := ['Event1 premium private other']
+            [$premiumPrivateEventOther$.private] := [true]
+            [$premiumPrivateEventOther$.description] := ['Desc']
+            [$premiumPrivateEventOther$.categories] += [$testCategoryOne$] 
+
+            //Premium user private event other 2
+
+            premiumPrivateEventOther2 := new Event
+            [$testPremiumUser2$.events]+=[$premiumPrivateEventOther2$]
+            [$testPremiumUser2$.manages]+=[$premiumPrivateEventOther2$]
+            [$testPremiumUser2$.attends]+=[$premiumPrivateEventOther2$]
+            [$premiumPrivateEventOther2$.title] := ['Event2 premium private other']
+            [$premiumPrivateEventOther2$.private] := [true]
+            [$premiumPrivateEventOther2$.description] := ['Desc']
+            [$premiumPrivateEventOther2$.categories] += [$testCategoryOne$]   
+
+            //premium user attends
+            [$testPremiumUser$.attends]+=[$premiumPrivateEventOther2$]
+
+            //moderator user attends
+            [$testModerator$.attends]+=[$premiumPrivateEventOther2$]    
+
+            //admin user attends
+            [$testAdmin$.attends]+=[$premiumPrivateEventOther2$]                       
+
+            //Premium user private event other 3
+
+            premiumPrivateEventOther3 := new Event
+            [$testPremiumUser2$.events]+=[$premiumPrivateEventOther3$]
+            [$testPremiumUser2$.manages]+=[$premiumPrivateEventOther3$]
+            [$testPremiumUser2$.attends]+=[$premiumPrivateEventOther3$]
+            [$premiumPrivateEventOther3$.title] := ['Event3 premium private other']
+            [$premiumPrivateEventOther3$.private] := [true]
+            [$premiumPrivateEventOther3$.description] := ['Desc']
+            [$premiumPrivateEventOther3$.categories] += [$testCategoryOne$]   
+
+
+
+
+            // MODERATOR
+
+
+            moderatorPublicEvent := new Event
+            [$testModerator$.events]+=[$moderatorPublicEvent$]
+            [$testModerator$.manages]+=[$moderatorPublicEvent$]
+            [$testModerator$.attends]+=[$moderatorPublicEvent$]
+            [$moderatorPublicEvent$.title] := ['Event1 moderator public']
+            [$moderatorPublicEvent$.private] := [false]
+            [$moderatorPublicEvent$.description] := ['Desc']
+            [$moderatorPublicEvent$.categories] += [$testCategoryOne$]
+
+            //Other user attends this event
+
+            [$otherFreeUser$.attends]+=[$moderatorPublicEvent$]
+            [$freeUser1$.requests]+=[$moderatorPublicEvent$]            
+
+            //Moderator user public event 2
+
+            moderatorPublicEvent2 := new Event
+            [$testModerator$.events]+=[$moderatorPublicEvent2$]
+            [$testModerator$.manages]+=[$moderatorPublicEvent2$]
+            [$testModerator$.attends]+=[$moderatorPublicEvent2$]
+            [$moderatorPublicEvent2$.title] := ['Event2 moderator public']
+            [$moderatorPublicEvent2$.private] := [false]
+            [$moderatorPublicEvent2$.description] := ['Desc']
+            [$moderatorPublicEvent2$.categories] += [$testCategoryOne$]
+
+            //Other free user requests to attend this event
+
+            [$otherFreeUser$.requests]+=[$moderatorPublicEvent2$]            
+
+            //Moderator user private event 
+
+            moderatorPrivateEvent3 := new Event
+            [$testModerator$.events]+=[$moderatorPrivateEvent3$]
+            [$testModerator$.manages]+=[$moderatorPrivateEvent3$]
+            [$testModerator$.attends]+=[$moderatorPrivateEvent3$]
+            [$moderatorPrivateEvent3$.title] := ['Event3 moderator private']
+            [$moderatorPrivateEvent3$.private] := [true]
+            [$moderatorPrivateEvent3$.description] := ['Desc']
+            [$moderatorPrivateEvent3$.categories] += [$testCategoryOne$]
+
+           //Other free user manages
+
+            [$otherFreeUser$.manages]+=[$moderatorPrivateEvent3$]
+            [$otherFreeUser$.attends]+=[$moderatorPrivateEvent3$]
+            
+            //ADMIN 
+
+            adminPublicEvent := new Event
+            [$testAdmin$.events]+=[$adminPublicEvent$]
+            [$testAdmin$.manages]+=[$adminPublicEvent$]
+            [$testAdmin$.attends]+=[$adminPublicEvent$]
+            [$adminPublicEvent$.title] := ['Event1 admin public']
+            [$adminPublicEvent$.private] := [false]
+            [$adminPublicEvent$.description] := ['Desc']
+            [$adminPublicEvent$.categories] += [$testCategoryOne$]
+
+            //Other user attends this event
+
+            [$otherFreeUser$.attends]+=[$adminPublicEvent$]   
+            [$freeUser1$.requests]+=[$adminPublicEvent$]            
+
+            //Moderator user public event 2
+
+            adminPublicEvent2 := new Event
+            [$testAdmin$.events]+=[$adminPublicEvent2$]
+            [$testAdmin$.manages]+=[$adminPublicEvent2$]
+            [$testAdmin$.attends]+=[$adminPublicEvent2$]
+            [$adminPublicEvent2$.title] := ['Event2 admin public']
+            [$adminPublicEvent2$.private] := [false]
+            [$adminPublicEvent2$.description] := ['Desc']
+            [$adminPublicEvent2$.categories] += [$testCategoryOne$]
+
+            //Other free user requests to attend this event
+
+            [$otherFreeUser$.requests]+=[$adminPublicEvent2$]                
+
+            adminPrivateEvent3 := new Event
+            [$testAdmin$.events]+=[$adminPrivateEvent3$]
+            [$testAdmin$.manages]+=[$adminPrivateEvent3$]
+            [$testAdmin$.attends]+=[$adminPrivateEvent3$]
+            [$adminPrivateEvent3$.title] := ['Event3 admin private']
+            [$adminPrivateEvent3$.private] := [true]
+            [$adminPrivateEvent3$.description] := ['Desc']
+            [$adminPrivateEvent3$.categories] += [$testCategoryOne$]
+
+            //Other free user manages
+
+            [$otherFreeUser$.manages]+=[$adminPrivateEvent3$]                                  
+            [$otherFreeUser$.attends]+=[$adminPrivateEvent3$]                                  
+            
+            // This is necessary to prevent an error that occurs otherwise
+            // Apparently, setting up the test data and then immediately using
+            // a newly generated user to open another window does not work properly
+            open EvaluationWindow(role:[Role::SYSTEM])
+        }
+    }
+
+    Button NoneUser_B {
+        String text := ['None User Test Cases']
+
+        event onClick {
+            open EvaluationNoneUserWindow(
+                role:[Role::NONE],
+                // Read test data that was set up previously
+                freeUser1:[Person.allInstances()->any(p | p.name='free1')],
+                freeUser2:[Person.allInstances()->any(p | p.name='free2')],
+                freeUser3:[Person.allInstances()->any(p | p.name='free3')],
+                freeUser4:[Person.allInstances()->any(p | p.name='free4')],
+                freshUser1:[Person.allInstances()->any(p | p.name='fresh1')],
+                freshUser2:[Person.allInstances()->any(p | p.name='fresh2')],
+                freshUser3:[Person.allInstances()->any(p | p.name='fresh3')],
+
+                person:[Person.allInstances()->any(p | p.username='person')],
+                public:[Event.allInstances()->any(e | e.title='public')],
+                private:[Event.allInstances()->any(e | e.title='private')],
+                category:[Category.allInstances()->any(c | c.name='category')],
+
+                testCategoryOne:[Category.allInstances()->any(c | c.name='Category1')],
+                testCategoryTwo:[Category.allInstances()->any(c | c.name='Category2')],
+                testCategoryThree:[Category.allInstances()->any(c | c.name='Category3')],
+
+                moderator:[Person.allInstances()->any(p | p.username='moderator')],
+                otherUser:[Person.allInstances()->any(p | p.username='alice')],
+                premium:[Person.allInstances()->any(p | p.username='premium')],  
+                otherModerator:[Person.allInstances()->any(p | p.username='moderator2')],              
+
+                othersEvent:[Event.allInstances()->any(e | e.title='Event1 other')],
+                othersEvent2:[Event.allInstances()->any(e | e.title='Event2 other')],
+                othersEvent3:[Event.allInstances()->any(e | e.title='Event3 other')],
+                othersEvent4:[Event.allInstances()->any(e | e.title='Event4 other')],     
+                othersEvent5:[Event.allInstances()->any(e | e.title='Event5 other')],                 
+                othersEvent6:[Event.allInstances()->any(e | e.title='Event6 other')], 
+                othersEvent7:[Event.allInstances()->any(e | e.title='Event7 other')],      
+                othersEvent8:[Event.allInstances()->any(e | e.title='Event8 other')],               
+                othersEvent9:[Event.allInstances()->any(e | e.title='Event9 other')],     
+                othersEvent10:[Event.allInstances()->any(e | e.title='Event10 other')],       
+                othersEvent11:[Event.allInstances()->any(e | e.title='Event11 other')],  
+                othersEvent12:[Event.allInstances()->any(e | e.title='Event12 other')],                                                             
+                privateEvent:[Event.allInstances()->any(e | e.title='Event1 premium private')],
+                privateEvent2:[Event.allInstances()->any(e | e.title='Event2 premium private')],
+                privateEvent3:[Event.allInstances()->any(e | e.title='Event3 premium private')]
+            )
+        }
+    }
+
+
+    Button VisitorUser_B {
+        String text := ['Visitor User Test Cases']
+
+        event onClick {
+            open EvaluationVisitorUserWindow(
+                caller:[Person.allInstances()->any(p | p.role=Role::VISITOR)],
+                role:[Role::VISITOR],
+                // Read test data that was set up previously
+                freeUser1:[Person.allInstances()->any(p | p.name='free1')],
+                freeUser2:[Person.allInstances()->any(p | p.name='free2')],
+                freeUser3:[Person.allInstances()->any(p | p.name='free3')],
+                freeUser4:[Person.allInstances()->any(p | p.name='free4')],
+                freshUser1:[Person.allInstances()->any(p | p.name='fresh1')],
+                freshUser2:[Person.allInstances()->any(p | p.name='fresh2')],
+                freshUser3:[Person.allInstances()->any(p | p.name='fresh3')],
+
+                person:[Person.allInstances()->any(p | p.username='person')],
+                public:[Event.allInstances()->any(e | e.title='public')],
+                private:[Event.allInstances()->any(e | e.title='private')],
+                category:[Category.allInstances()->any(c | c.name='category')],
+
+                testCategoryOne:[Category.allInstances()->any(c | c.name='Category1')],
+                testCategoryTwo:[Category.allInstances()->any(c | c.name='Category2')],
+                testCategoryThree:[Category.allInstances()->any(c | c.name='Category3')],
+
+                moderator:[Person.allInstances()->any(p | p.username='moderator')],
+                otherUser:[Person.allInstances()->any(p | p.username='alice')],
+                premium:[Person.allInstances()->any(p | p.username='premium')],  
+                otherModerator:[Person.allInstances()->any(p | p.username='moderator2')],              
+
+                othersEvent:[Event.allInstances()->any(e | e.title='Event1 other')],
+                othersEvent2:[Event.allInstances()->any(e | e.title='Event2 other')],
+                othersEvent3:[Event.allInstances()->any(e | e.title='Event3 other')],
+                othersEvent4:[Event.allInstances()->any(e | e.title='Event4 other')],     
+                othersEvent5:[Event.allInstances()->any(e | e.title='Event5 other')],                 
+                othersEvent6:[Event.allInstances()->any(e | e.title='Event6 other')], 
+                othersEvent7:[Event.allInstances()->any(e | e.title='Event7 other')],      
+                othersEvent8:[Event.allInstances()->any(e | e.title='Event8 other')],               
+                othersEvent9:[Event.allInstances()->any(e | e.title='Event9 other')],     
+                othersEvent10:[Event.allInstances()->any(e | e.title='Event10 other')],       
+                othersEvent11:[Event.allInstances()->any(e | e.title='Event11 other')],  
+                othersEvent12:[Event.allInstances()->any(e | e.title='Event12 other')],                                                             
+                privateEvent:[Event.allInstances()->any(e | e.title='Event1 premium private')],
+                privateEvent2:[Event.allInstances()->any(e | e.title='Event2 premium private')],
+                privateEvent3:[Event.allInstances()->any(e | e.title='Event3 premium private')]
+
+            )
+        }
+    }
+
+
+
+    Button FreeUser_B {
+        String text := ['Free User Test Cases']
+        Person testFreeUser := [Person.allInstances()->any(p | p.username='free')]
+
+        event onClick {
+            open EvaluationFreeUserWindow(
+                caller:[$testFreeUser$],
+                role:[Role::FREEUSER],
+                // Read test data that was set up previously
+                freeUser1:[Person.allInstances()->any(p | p.name='free1')],
+                freeUser2:[Person.allInstances()->any(p | p.name='free2')],
+                freeUser3:[Person.allInstances()->any(p | p.name='free3')],
+                freeUser4:[Person.allInstances()->any(p | p.name='free4')],
+                freshUser1:[Person.allInstances()->any(p | p.name='fresh1')],
+                freshUser2:[Person.allInstances()->any(p | p.name='fresh2')],
+                freshUser3:[Person.allInstances()->any(p | p.name='fresh3')],
+
+                person:[Person.allInstances()->any(p | p.username='person')],
+                public:[Event.allInstances()->any(e | e.title='public')],
+                private:[Event.allInstances()->any(e | e.title='private')],
+                category:[Category.allInstances()->any(c | c.name='category')],
+
+                testCategoryOne:[Category.allInstances()->any(c | c.name='Category1')],
+                testCategoryTwo:[Category.allInstances()->any(c | c.name='Category2')],
+                testCategoryThree:[Category.allInstances()->any(c | c.name='Category3')],
+
+                moderator:[Person.allInstances()->any(p | p.username='moderator')],
+                otherUser:[Person.allInstances()->any(p | p.username='alice')],
+                premium:[Person.allInstances()->any(p | p.username='premium')],  
+                otherModerator:[Person.allInstances()->any(p | p.username='moderator2')],              
+
+                ownEvent:[Event.allInstances()->any(e | e.title='Event1')],
+                ownEvent2:[Event.allInstances()->any(e | e.title='Event2')],
+                ownEvent3:[Event.allInstances()->any(e | e.title='Event3')],
+                ownEvent4:[Event.allInstances()->any(e | e.title='Event4')],
+                othersEvent:[Event.allInstances()->any(e | e.title='Event1 other')],
+                othersEvent2:[Event.allInstances()->any(e | e.title='Event2 other')],
+                othersEvent3:[Event.allInstances()->any(e | e.title='Event3 other')],
+                othersEvent4:[Event.allInstances()->any(e | e.title='Event4 other')],     
+                othersEvent5:[Event.allInstances()->any(e | e.title='Event5 other')],                 
+                othersEvent6:[Event.allInstances()->any(e | e.title='Event6 other')], 
+                othersEvent7:[Event.allInstances()->any(e | e.title='Event7 other')],      
+                othersEvent8:[Event.allInstances()->any(e | e.title='Event8 other')],               
+                othersEvent9:[Event.allInstances()->any(e | e.title='Event9 other')],     
+                othersEvent10:[Event.allInstances()->any(e | e.title='Event10 other')],       
+                othersEvent11:[Event.allInstances()->any(e | e.title='Event11 other')],  
+                othersEvent12:[Event.allInstances()->any(e | e.title='Event12 other')],                                                             
+                privateEvent:[Event.allInstances()->any(e | e.title='Event1 premium private')],
+                privateEvent2:[Event.allInstances()->any(e | e.title='Event2 premium private')],
+                privateEvent3:[Event.allInstances()->any(e | e.title='Event3 premium private')]
+            )
+        }
+    }
+
+    Button PremiumUser_B {
+        String text := ['Premium User Test Cases']
+        Person testPremiumUser := [Person.allInstances()->any(p | p.username='premium')]
+
+        event onClick {
+            open EvaluationPremiumUserWindow(
+                caller:[$testPremiumUser$],
+                role:[Role::PREMIUMUSER],
+                // Read test data that was set up previously
+                freeUser1:[Person.allInstances()->any(p | p.name='free1')],
+                freeUser2:[Person.allInstances()->any(p | p.name='free2')],
+                freeUser3:[Person.allInstances()->any(p | p.name='free3')],
+                freeUser4:[Person.allInstances()->any(p | p.name='free4')],
+                freshUser1:[Person.allInstances()->any(p | p.name='fresh1')],
+                freshUser2:[Person.allInstances()->any(p | p.name='fresh2')],
+                freshUser3:[Person.allInstances()->any(p | p.name='fresh3')],
+
+                person:[Person.allInstances()->any(p | p.username='person')],
+                public:[Event.allInstances()->any(e | e.title='public')],
+                private:[Event.allInstances()->any(e | e.title='private')],
+                category:[Category.allInstances()->any(c | c.name='category')],
+
+                testCategoryOne:[Category.allInstances()->any(c | c.name='Category1')],
+                testCategoryTwo:[Category.allInstances()->any(c | c.name='Category2')],
+                testCategoryThree:[Category.allInstances()->any(c | c.name='Category3')],
+
+                moderator:[Person.allInstances()->any(p | p.username='moderator')], 
+                freeUser:[Person.allInstances()->any(p | p.username='free')],
+                otherUser:[Person.allInstances()->any(p | p.username='alice')],
+                otherPremium:[Person.allInstances()->any(p | p.username='premium2')],  
+                otherModerator:[Person.allInstances()->any(p | p.username='moderator2')],
+              
+
+                //Events own
+                ownEventPublic:[Event.allInstances()->any(e | e.title='Event1 premium public')],
+                ownEventPublic2:[Event.allInstances()->any(e | e.title='Event2 premium public')],
+                ownEventPrivate:[Event.allInstances()->any(e | e.title='Event1 premium private')],
+                ownEventPrivate2:[Event.allInstances()->any(e | e.title='Event2 premium private')],
+                ownEventPrivate3:[Event.allInstances()->any(e | e.title='Event3 premium private')],
+                //Event others
+                othersEvent:[Event.allInstances()->any(e | e.title='Event1 other')],
+                othersEvent2:[Event.allInstances()->any(e | e.title='Event2 other')],
+                othersEvent3:[Event.allInstances()->any(e | e.title='Event3 other')],
+                othersEvent4:[Event.allInstances()->any(e | e.title='Event4 other')],
+                othersEvent5:[Event.allInstances()->any(e | e.title='Event5 other')],                 
+                othersEvent6:[Event.allInstances()->any(e | e.title='Event6 other')],             
+                othersEvent9:[Event.allInstances()->any(e | e.title='Event9 other')],                 
+                othersEvent10:[Event.allInstances()->any(e | e.title='Event10 other')],     
+                othersEvent11:[Event.allInstances()->any(e | e.title='Event11 other')],
+                othersEvent12:[Event.allInstances()->any(e | e.title='Event12 other')],
+                //Others private                     
+                privateEventOther:[Event.allInstances()->any(e | e.title='Event1 premium private other')],
+                privateEventOther2:[Event.allInstances()->any(e | e.title='Event2 premium private other')],
+                privateEventOther3:[Event.allInstances()->any(e | e.title='Event3 premium private other')]
+            )
+        }
+    }
+
+    Button ModeratorUser_B {
+        String text := ['Moderator User Test Cases']
+        Person testModeratorUser := [Person.allInstances()->any(p | p.username='moderator')]
+
+        event onClick {
+            open EvaluationModeratorUserWindow(
+                caller:[$testModeratorUser$],
+                role:[Role::MODERATOR],
+                // Read test data that was set up previously
+                freeUser1:[Person.allInstances()->any(p | p.name='free1')],
+                freeUser2:[Person.allInstances()->any(p | p.name='free2')],
+                freeUser3:[Person.allInstances()->any(p | p.name='free3')],
+                freeUser4:[Person.allInstances()->any(p | p.name='free4')],
+                freshUser1:[Person.allInstances()->any(p | p.name='fresh1')],
+                freshUser2:[Person.allInstances()->any(p | p.name='fresh2')],
+                freshUser3:[Person.allInstances()->any(p | p.name='fresh3')],
+
+                person:[Person.allInstances()->any(p | p.username='person')],
+                public:[Event.allInstances()->any(e | e.title='public')],
+                private:[Event.allInstances()->any(e | e.title='private')],
+                category:[Category.allInstances()->any(c | c.name='category')],
+
+                testCategoryOne:[Category.allInstances()->any(c | c.name='Category1')],
+                testCategoryTwo:[Category.allInstances()->any(c | c.name='Category2')],
+                testCategoryThree:[Category.allInstances()->any(c | c.name='Category3')],
+
+                freeUser:[Person.allInstances()->any(p | p.username='free')],
+                otherUser:[Person.allInstances()->any(p | p.username='alice')],
+                premiumUser:[Person.allInstances()->any(p | p.username='premium')],
+                otherPremium:[Person.allInstances()->any(p | p.username='premium2')],
+                otherModerator:[Person.allInstances()->any(p | p.username='moderator2')],
+
+                //Events own
+                ownEventPublic:[Event.allInstances()->any(e | e.title='Event1 moderator public')],
+                ownEventPublic2:[Event.allInstances()->any(e | e.title='Event2 moderator public')],
+                //ownEventPrivate:[Event.allInstances()->any(e | e.title='Event1 moderator private')],
+                //ownEventPrivate2:[Event.allInstances()->any(e | e.title='Event2 moderator private')],
+                ownEventPrivate3:[Event.allInstances()->any(e | e.title='Event3 moderator private')],                
+                //Event others
+                othersEvent:[Event.allInstances()->any(e | e.title='Event1 other')],
+                othersEvent2:[Event.allInstances()->any(e | e.title='Event2 other')],
+                othersEvent3:[Event.allInstances()->any(e | e.title='Event3 other')],
+                othersEvent4:[Event.allInstances()->any(e | e.title='Event4 other')],
+                othersEvent5:[Event.allInstances()->any(e | e.title='Event5 other')],                 
+                othersEvent6:[Event.allInstances()->any(e | e.title='Event6 other')],             
+                othersEvent9:[Event.allInstances()->any(e | e.title='Event9 other')],                 
+                othersEvent10:[Event.allInstances()->any(e | e.title='Event10 other')],     
+                othersEvent11:[Event.allInstances()->any(e | e.title='Event11 other')],
+                othersEvent12:[Event.allInstances()->any(e | e.title='Event12 other')],
+                //Others private
+                privateEventOther:[Event.allInstances()->any(e | e.title='Event1 premium private other')],
+                privateEventOther2:[Event.allInstances()->any(e | e.title='Event2 premium private other')],
+                privateEventOther3:[Event.allInstances()->any(e | e.title='Event3 premium private other')]
+            )
+        }
+    }    
+
+    Button AdminUser_B {
+        String text := ['Admin User Test Cases']
+        Person testAdminUser := [Person.allInstances()->any(p | p.username='admin')]
+
+        event onClick {
+            open EvaluationAdminUserWindow(
+                caller:[$testAdminUser$],
+                role:[Role::ADMIN],
+                // Read test data that was set up previously
+                freeUser1:[Person.allInstances()->any(p | p.name='free1')],
+                freeUser2:[Person.allInstances()->any(p | p.name='free2')],
+                freeUser3:[Person.allInstances()->any(p | p.name='free3')],
+                freeUser4:[Person.allInstances()->any(p | p.name='free4')],
+                freshUser1:[Person.allInstances()->any(p | p.name='fresh1')],
+                freshUser2:[Person.allInstances()->any(p | p.name='fresh2')],
+                freshUser3:[Person.allInstances()->any(p | p.name='fresh3')],
+
+                person:[Person.allInstances()->any(p | p.username='person')],
+                public:[Event.allInstances()->any(e | e.title='public')],
+                private:[Event.allInstances()->any(e | e.title='private')],
+                category:[Category.allInstances()->any(c | c.name='category')],
+
+                testCategoryOne:[Category.allInstances()->any(c | c.name='Category1')],
+                testCategoryTwo:[Category.allInstances()->any(c | c.name='Category2')],
+                testCategoryThree:[Category.allInstances()->any(c | c.name='Category3')],
+
+                moderator:[Person.allInstances()->any(p | p.username='moderator')], 
+                freeUser:[Person.allInstances()->any(p | p.username='free')],
+                otherUser:[Person.allInstances()->any(p | p.username='alice')],
+                premiumUser:[Person.allInstances()->any(p | p.username='premium')],
+                otherPremium:[Person.allInstances()->any(p | p.username='premium2')],
+                otherModerator:[Person.allInstances()->any(p | p.username='moderator2')],
+
+                //Events own
+                ownEventPublic:[Event.allInstances()->any(e | e.title='Event1 admin public')],
+                ownEventPublic2:[Event.allInstances()->any(e | e.title='Event2 admin public')],
+                //ownEventPrivate:[Event.allInstances()->any(e | e.title='Event1 admin private')],
+                //ownEventPrivate2:[Event.allInstances()->any(e | e.title='Event2 admin private')],
+                ownEventPrivate3:[Event.allInstances()->any(e | e.title='Event3 admin private')],                
+                //Event others
+                othersEvent:[Event.allInstances()->any(e | e.title='Event1 other')],
+                othersEvent2:[Event.allInstances()->any(e | e.title='Event2 other')],
+                othersEvent3:[Event.allInstances()->any(e | e.title='Event3 other')],
+                othersEvent4:[Event.allInstances()->any(e | e.title='Event4 other')],
+                othersEvent5:[Event.allInstances()->any(e | e.title='Event5 other')],                 
+                othersEvent6:[Event.allInstances()->any(e | e.title='Event6 other')],             
+                othersEvent9:[Event.allInstances()->any(e | e.title='Event9 other')],                 
+                othersEvent10:[Event.allInstances()->any(e | e.title='Event10 other')],     
+                othersEvent11:[Event.allInstances()->any(e | e.title='Event11 other')],
+                othersEvent12:[Event.allInstances()->any(e | e.title='Event12 other')],
+                //Others private
+                privateEventOther:[Event.allInstances()->any(e | e.title='Event1 premium private other')],
+                privateEventOther2:[Event.allInstances()->any(e | e.title='Event2 premium private other')],
+                privateEventOther3:[Event.allInstances()->any(e | e.title='Event3 premium private other')]
+            )
+        }
+    }        
+
+    Button Back_B {
+        String text := ['Back']
+        event onClick {
+            back
+        }
+    }
+}

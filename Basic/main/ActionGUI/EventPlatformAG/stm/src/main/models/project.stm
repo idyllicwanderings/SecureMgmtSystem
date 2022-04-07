@@ -1,0 +1,72 @@
+role NONE {
+  Person {
+    fullAccess
+  }
+  Event {
+    fullAccess
+  }
+  Category {
+    fullAccess
+  }
+}
+
+role VISITOR {
+  Person {
+    fullAccess
+  }
+  Event {
+    fullAccess
+  }
+  Category {
+    fullAccess
+  }
+}
+
+role FREEUSER {
+  Person {
+    fullAccess
+  }
+  Event {
+    fullAccess
+  }
+  Category {
+    fullAccess
+  }
+}
+
+role PREMIUMUSER {
+  Person {
+    fullAccess
+  }
+  Event {
+    fullAccess
+  }
+  Category {
+    fullAccess
+  }
+}
+
+role MODERATOR {
+  Person {
+    fullAccess
+  }
+  Event {
+    fullAccess
+  }
+  Category {
+    fullAccess
+  }
+}
+
+role ADMIN {
+  Person {
+    fullAccess
+  }
+  Event {
+    fullAccess
+  }
+  Category {
+    fullAccess
+  }
+}
+

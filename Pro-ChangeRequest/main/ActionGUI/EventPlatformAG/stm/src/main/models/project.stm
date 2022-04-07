@@ -1,0 +1,490 @@
+role NONE {
+
+  Person {
+    create 
+
+    //they can only set their username and password, which means they cannot change once it is set for the first ime
+    update(username) constrainedBy [self.username.oclIsUndefined() and not(value.oclIsUndefined())]
+    update(password) constrainedBy [self.password.oclIsUndefined() and not(value.oclIsUndefined())]
+    update(role) constrainedBy [value = Role::FREEUSER]
+
+    read(username), read(password), read(role)
+
+  }
+
+  Event {
+  }
+
+  Category {
+  }
+
+  Invite {
+
+  }
+}
+
+role VISITOR {
+  Person {
+    read(moderates) 
+  }
+
+  Event {
+    read(categories),read(private)
+    read(title),read(description),read(owner) constrainedBy [not(self.private)]
+  }
+
+  Category {
+    read(moderators),read(name),read(events)
+  }
+
+  Invite {
+    //new:Anyone can create an invitation
+    create 
+  }
+}
+
+
+role FREEUSER extends VISITOR {
+  
+
+  Person {
+    //a user can read any user's core info
+    read(name),read(surname),read(username),read(role) constrainedBy 
+      [self.role = Role::FREEUSER or self.role = Role::PREMIUMUSER 
+      or self.role = Role::MODERATOR or self.role = Role::ADMIN]
+
+    //new: Each user can see the invitations they received or sent.
+    read(invitations) constrainedBy [ caller = self ]
+    read(invites) constrainedBy [ caller = self ]
+ 
+
+    //fix: an admin can edit/see user's passwords and roles
+    update(password) constrainedBy [
+      (caller = self or caller.role = Role::ADMIN) and not(value.oclIsUndefined())]
+
+    update(username) constrainedBy [
+        caller = self and not(value.oclIsUndefined())]
+
+    update(surname),update(name) constrainedBy [caller = self]
+
+
+    read(events),read(manages),read(attends),read(subscriptions),read(requests) constrainedBy [caller = self]
+    
+    //no fix: read password by admin
+    //read(password) constrainedBy [caller = self or caller.role = Role::ADMIN]
+    
+    
+    
+    //fix: 1. can start from null
+    // 2. cannot demote a moderator while his is moderating a category
+    update(role) constrainedBy 
+      [caller.role = Role::ADMIN 
+        and not(value = Role::VISITOR or value.oclIsUndefined() or value = Role::NONE)
+        and not(self.role = Role::MODERATOR and not(value = Role::MODERATOR or value = Role::ADMIN) and not(self.moderates->isEmpty()))]
+        
+        
+
+    //asso end: an owner can promote attendants to managedBys,and demote themselves
+    // A let event add to B . event: target, caller: owner
+    //ATTENTION: don't put atteation inside a constraint...
+    //target: event, caller: event's owner, self:target's person
+    //A wants to add event B to the person C's manages.
+    add(manages) constrainedBy [
+      (target.owner = caller or caller.events->includes(target))
+      and (self.attends->includes(target) or target.owner = caller or caller.events->includes(target))
+      and not(self.manages->includes(target))]
+    
+    // Asso end: 1. owner demote managedBys 2. [or]managedBys remove themselves 3. [and]owner cannot remove themselves
+
+    remove(manages) constrainedBy [
+        self.manages->includes(target)
+        and (target.owner = caller or caller.events->includes(target))
+        and not(self = caller)]
+
+
+    //TODO: did not address the problem of asso end of update()
+
+    //Asso end: managedBy or owner can add requesters to attendants
+    // new: asso end Any user can add themselves as attendant to an event, 
+    //if they have been invited to the event.
+    add(attends) constrainedBy [
+        (
+          ((target.owner = caller or caller.events->includes(target) 
+              or target.managedBy->includes(caller)) 
+          and (self.requests->includes(target) 
+              or target.owner = caller or caller.events->includes(target)))
+        or 
+          (caller = self 
+            and target.invitations->exists(m | m.invitee = caller))
+        )
+        and not(self.attends->includes(target))]
+
+    
+    //Asso end:1. managedBy can remove attendants
+    //(normal attendants, not owner, not managedBy, but can be themselves)
+    //2. everyone except the owner can remove themselves
+    remove(attends) constrainedBy [
+        self.attends->includes(target) 
+        and (target.managedBy->includes(caller) or target.owner = caller or caller.events->includes(target) 
+            or caller = self)
+        and not(self.manages->includes(target) or target.owner=self or self.events->includes(target))
+    ]
+
+    //asso end: a user can request to join a public event
+    //new: asso end if a user has been invited to an event,they cannot request to join the event
+    add(requests) constrainedBy 
+      [caller = self 
+        and not(self.requests->includes(target)) 
+        and not(target.private)
+        and not(target.invitations->exists(m | m.invitee = self))]
+
+    //asso end: 1. only manager can accept or deny requests
+    //2. a user cancel their request
+    remove(requests) constrainedBy 
+      [self.requests->includes(target) 
+      and (target.owner = caller or caller.events->includes(target) 
+          or target.managedBy->includes(caller) 
+          or self = caller)]
+  
+    //association end : a user can remove himself from being a moderator of a category
+    remove(moderates) constrainedBy 
+      [caller = self 
+       and self.moderates->includes(target)]
+
+    //asso end: update owner
+    add(events) constrainedBy [not(self.events->includes(target)) and caller = self]
+
+    //new: asso end
+    // Only event managers can invite users to events they manage by associating them as invitees in the invitation.
+    // 1.the caller is the manager
+    // 1. the caller invites
+    add(invitations) constrainedBy [
+      not(self.invitations->includes(target))
+        and target.event.managedBy->includes(caller)
+        and not(target.event.requesters->includes(self))
+    ]
+
+    remove(invitations) constrainedBy [
+      self.invitations->includes(target)
+    ]
+
+    //new: asso end
+    //TODO
+    add(invites) constrainedBy [
+      not(self.invites->includes(target))
+        and target.event.managedBy->includes(caller)
+    ]
+
+    //new 
+    remove(invites) constrainedBy [
+      self.invites->includes(target)
+    ]
+  }
+
+
+
+  Event {
+    // a free user can only create public events
+    create 
+
+
+    //Only the owner can update the private/public value
+    update(private) constrainedBy [(caller = self.owner or caller.events->includes(self))
+        and self.private.oclIsUndefined() and not(value)]
+    
+    //new
+    // event's invitedBy can read core info and attendants and managedBy
+    //TODO: self.invitations->exists(x | x.invitedBy->includes(caller))
+    read(title),read(description),read(owner),read(attendants),read(managedBy) constrainedBy 
+      [not(self.private) or self.invitations->exists(x | x.invitee=caller)]
+
+    // new: Managers can see all invitations of the event they manage.
+    read(invitations) constrainedBy [
+      self.managedBy->includes(caller)]
+
+    update(owner) constrainedBy 
+      [self.owner.oclIsUndefined() and not(value.oclIsUndefined())]
+
+    //only an event manager can edit event's core information(except for owner)
+    update(title),update(description) constrainedBy 
+      [self.owner = caller or caller.events->includes(self) 
+       or self.managedBy->includes(caller)]
+
+    //an owner can promote attendants to managedBys,and demote themselves
+    add(managedBy) constrainedBy 
+      [(self.owner = caller or caller.events->includes(self))
+        and (self.attendants->includes(target) or self.owner = caller or caller.events->includes(self)) and not(self.managedBy->includes(target))]
+
+    // 1. owner demote managedBys 
+    // 2. [or]managedBys remove themselves 
+    // 3. [and]owner cannot remove themselves
+    remove(managedBy) constrainedBy [
+      self.managedBy->includes(target) and 
+      (self.owner = caller or caller.events->includes(self)) 
+      and not(target = caller)]
+
+    //managedBy or owner can add requesters to attendants
+    // new: Any user can add themselves as attendant to an event, if they have been invited to the event.
+    add(attendants) constrainedBy 
+      [(    
+        ((self.owner = caller or caller.events->includes(self) 
+              or self.managedBy->includes(caller)) 
+            and (self.requesters->includes(target) 
+              or self.owner = caller or caller.events->includes(self)))
+          or 
+            (caller = target 
+              and self.invitations->exists(m | m.invitee = caller))
+        )
+        and not(self.attendants->includes(target))]
+
+    //1. managedBy can remove attendants(normal attendants, not owner, not managedBy, not themselves)
+    //2. everyone except the managers can remove themselves
+
+    //1.manager/owner cannot remove themselves
+    remove(attendants) constrainedBy [
+        self.attendants->includes(target) 
+        and 
+          (self.managedBy->includes(caller) or self.owner = caller or caller.events->includes(self)
+          or caller = target)
+        and 
+          not(self.managedBy->includes(target) or self.owner=target or target.events->includes(self))
+        ]
+
+
+    //managedBy(includes owner) can see the requests for the events
+    read(requesters) constrainedBy 
+      [self.managedBy->includes(caller)
+        or self.owner = caller or caller.events->includes(self)]
+
+    
+    //a user can request to join a public event
+    //new : if a user has been invited to an event,they cannot request to join the event
+    add(requesters) constrainedBy 
+      [caller = target 
+        and not(self.requesters->includes(target)) 
+        and not(self.private)
+        and not(self.invitations->exists(m | m.invitee = target))]
+
+    //1. only manager can accept or deny requests
+    //2. a user cancel their request
+    remove(requesters) constrainedBy 
+      [self.requesters->includes(target) 
+      and (self.owner = caller or caller.events->includes(self) 
+          or self.managedBy->includes(caller)
+          or target = caller)]
+
+    //only manager can accept or deny requests
+    add(categories) constrainedBy [
+      (self.owner = caller or caller.events->includes(self) 
+          or self.managedBy->includes(caller))
+      and not(self.categories->includes(target))]
+
+    remove(categories) constrainedBy [
+        (self.owner = caller or caller.events->includes(self) 
+          or self.managedBy->includes(caller))
+        and (self.categories->includes(target))]
+    
+      //new:asso end
+      add(invitations) constrainedBy [
+        not(self.invitations->includes(target))
+          and self.managedBy->includes(caller)
+      ]
+      //new
+      remove(invitations) constrainedBy [
+        self.invitations->includes(target)
+      ]
+  }
+
+  Category {
+
+    //only moderators of a category can see its subscribors
+    read(subscribers) constrainedBy [self.moderators->includes(caller)]
+
+    //a user can remove himself from being a moderator of a category
+    remove(moderators) constrainedBy [caller = target and self.moderators->includes(target)]
+
+    //only manager can accept or deny requests
+    add(events) constrainedBy [
+          (target.managedBy->includes(caller) or target.owner=caller or caller.events->includes(target))
+          and not(self.events->includes(target))]
+
+    remove(events) constrainedBy [
+          (target.managedBy->includes(caller) or target.owner=caller or caller.events->includes(target))
+          and self.events->includes(target)]
+  }
+
+  Invite {
+    //new
+    //1. Any user can cancel invitations that they have sent.
+    // 2. Event managers can cancel any invitation sent for the events they manage.
+     //(not necessarily the invitedBy
+     // 3. An invited user can accept or decline the invitation (in both cases, the invitation is deleted).
+   
+    delete constrainedBy [
+      self.invitedBy = caller
+        or self.event.managedBy->includes(caller)
+        or self.invitee = caller
+    ]
+
+    read(invitedBy),read(invitee),read(event) constrainedBy [
+       self.invitedBy = caller 
+        or self.event.managedBy->includes(caller)
+        or self.invitee = caller
+    ]
+
+    //new: 
+    //now suppose they can only set other managers as well.
+    update(invitedBy) constrainedBy [
+      self.invitedBy.oclIsUndefined() 
+        and not(value.oclIsUndefined()) 
+        and self.event.managedBy->includes(value)
+    ]
+    
+    // new:
+    // 1. Only event managers can invite users to events they manage by associating them as invitees in the invitation.
+    // 2. A user who already requested to join an event cannot be invited to it.
+    update(invitee) constrainedBy [
+      self.invitee.oclIsUndefined() 
+        and not(value.oclIsUndefined())
+        and self.event.managedBy->includes(caller)
+        and not(self.event.requesters->includes(value))
+    ]
+
+
+    //new: Only event managers can associate invitations to events they manage
+    update(event) constrainedBy [
+      self.event.oclIsUndefined() 
+        and not(value.oclIsUndefined()) 
+        and value.managedBy->includes(caller)
+    ]
+  }
+
+}
+
+
+
+role PREMIUMUSER extends FREEUSER {
+
+  Person {
+    // a premium can add themselves to subscribe to categories 
+    add(subscriptions) constrainedBy [self = caller and not(self.subscriptions->includes(target))]
+    remove(subscriptions) constrainedBy [self = caller and (self.subscriptions->includes(target))]
+
+    //a premium can request to join private events
+    //new: asso end if a user has been invited to an event,they cannot request to join the event
+    add(requests) constrainedBy 
+      [self = caller 
+        and not(self.requests->includes(target))
+        and not(target.invitations->exists(m | m.invitee = self))]
+
+  }
+
+  Event {
+    create 
+
+    //premium user can create private events
+    update(private) constrainedBy [(caller = self.owner or caller.events->includes(self))
+        and self.private.oclIsUndefined() and not(value.oclIsUndefined())]
+
+    //only attentendents can see the core info of private events
+    //new: same as FREEUSER
+    read(title),read(description),read(owner),read(attendants),read(managedBy) constrainedBy 
+      [not(self.private) or 
+      (self.private and 
+          (self.attendants->includes(caller) or 
+           self.managedBy->includes(caller) or 
+           self.owner = caller or caller.events->includes(self))) or
+      self.invitations->exists(x | x.invitee=caller)
+      ]
+      //self.invitations->exists(x | x.invitedBy=caller)
+
+    //asso end
+    //new : if a user has been invited to an event,they cannot request to join the event
+    add(requesters) constrainedBy [
+      caller = target 
+        and not(self.requesters->includes(target))
+        and not(self.invitations->exists(m | m.invitee = target))
+      ]
+
+  }
+
+  Category {
+    //asso end
+    add(subscribers) constrainedBy [caller = target and not(self.subscribers->includes(target))]
+    //asso end
+    remove(subscribers) constrainedBy [caller = target and (self.subscribers->includes(target))]
+  }
+
+  Invite {
+  }
+
+}
+
+
+
+role MODERATOR extends PREMIUMUSER {
+
+  Event {
+    //asso end
+    remove(categories) constrainedBy 
+    // target : category, self: event, caller = moderator, 
+      [self.categories->includes(target) and 
+       (target.moderators->includes(caller) or self.managedBy->includes(caller)
+        or self.owner=caller or caller.events->includes(self))]
+  }
+
+  Category {
+    //a moderator can remove events from the category they moderate
+    remove(events) constrainedBy 
+      [self.events->includes(target) and 
+        (self.moderators->includes(caller) or target.managedBy->includes(caller) 
+        or target.owner=caller or caller.events->includes(target))]
+  }
+
+  Invite {
+  }
+
+}
+
+
+role ADMIN extends MODERATOR {
+    //
+    Person {
+      // an admin can delete any user
+      delete constrainedBy 
+        [self.role = Role::FREEUSER or self.role = Role::PREMIUMUSER 
+        or self.role = Role::MODERATOR or self.role = Role::ADMIN]
+   
+      read(role),read(moderates),read(username) //fix: no read username
+
+      // an admin can edit user's moderating categories
+      add(moderates) constrainedBy [not(self.moderates->includes(target))
+        and (self.role = Role::FREEUSER or self.role = Role::PREMIUMUSER 
+            or self.role = Role::MODERATOR or self.role = Role::ADMIN) ]
+
+      remove(moderates) constrainedBy [self.moderates->includes(target)
+            and (self.role = Role::FREEUSER or self.role = Role::PREMIUMUSER 
+            or self.role = Role::MODERATOR or self.role = Role::ADMIN)]
+
+    }
+
+    Category {
+      create
+      delete
+      update(name) constrainedBy [not(value.oclIsUndefined())]
+
+      //asso end
+      add(moderators) constrainedBy [not(self.moderators->includes(target))
+            and (target.role = Role::FREEUSER or target.role = Role::PREMIUMUSER 
+            or target.role = Role::MODERATOR or target.role = Role::ADMIN)]
+      remove(moderators) constrainedBy [self.moderators->includes(target)
+            and (target.role = Role::FREEUSER or target.role = Role::PREMIUMUSER 
+            or target.role = Role::MODERATOR or target.role = Role::ADMIN)]
+    }
+
+    Invite {
+
+    }
+
+}
+

@@ -1,0 +1,98 @@
+Window CategoryEditWindow {
+    Category entity
+    Label Category_L {
+        String text := ['Category: ' + $CategoryEditWindow.entity$.name]
+    }
+    TextField Name_TF {
+        String text := [$CategoryEditWindow.entity$.name]
+    }
+    Button Update_B {
+        String text := ['Update info']
+        event onClick {
+            try {
+                if [$CategoryEditWindow.entity$.name <> $Name_TF.text$] {
+                    [$CategoryEditWindow.entity$.name]:=[$Name_TF.text$]
+                }
+            } catch (SecurityException) {
+                notification(['Error'],['Not allowed'],[500])
+            }
+        }
+    }
+    Table Table_Mods_T {
+        Set(Person) rows := [$CategoryEditWindow.entity$.moderators]
+        Person selected := [null]
+        columns {
+            ['Category Moderators'] : Label mods {
+                event onView (text) {
+                    try {
+                        text := [$Table_Mods_T.row$.name.concat(' ').concat($Table_Mods_T.row$.surname)]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+    Button Remove_B {
+        String text := ['Remove']
+        event onClick {
+            if [(not $Table_Mods_T.selected$.oclIsUndefined())] {
+                try {
+                    [$CategoryEditWindow.entity$.moderators] -= [$Table_Mods_T.selected$]
+                    notification(['Success'],['Moderator removed'],[500])
+                    Table_Mods_T.rows := [null]
+                    reevaluate Table_Mods_T.rows
+                    Table_Candidates_T.rows := [null]
+                    reevaluate Table_Candidates_T.rows
+
+                } catch (SecurityException) {
+                        notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Nothing selected'],[500])
+            }
+        }
+    }
+    Table Table_Candidates_T {
+        Set(Person) rows := [Person.allInstances()->select(p|p.role=Role::MODERATOR) - $CategoryEditWindow.entity$.moderators]
+        Person selected := [null]
+        columns {
+            ['Candidate Moderators'] : Label mods {
+                event onView (text) {
+                    try {
+                        text := [$Table_Candidates_T.row$.name.concat(' ').concat($Table_Candidates_T.row$.surname)]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+    Button Add_B {
+        String text := ['Add']
+        event onClick {
+            if [(not $Table_Candidates_T.selected$.oclIsUndefined())] {
+                try {
+                    [$CategoryEditWindow.entity$.moderators] += [$Table_Candidates_T.selected$]
+                    notification(['Success'],['Moderator added'],[500])
+                    Table_Mods_T.rows := [null]
+                    reevaluate Table_Mods_T.rows
+                    Table_Candidates_T.rows := [null]
+                    reevaluate Table_Candidates_T.rows
+
+                } catch (SecurityException) {
+                        notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Nothing selected'],[500])
+            }
+        }
+    }
+    
+    Button Back_B {
+        String text := ['Back']
+        event onClick {
+            back
+        }
+    }
+}

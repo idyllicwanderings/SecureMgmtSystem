@@ -1,0 +1,56 @@
+Window UserListWindow {
+    Label Title_L {
+        String text := ['Users:']
+    }
+    Table Table_T {
+        Set(Person) rows := [Person.allInstances()]
+        Person selected  := [null]
+        columns {
+            ['Name'] : Label username {
+                event onView (text) {
+                    try {
+                        text := [$Table_T.row$.name]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+            ['Surname'] : Label usersurname {
+                event onView (text) {
+                    try {
+                        text := [$Table_T.row$.surname]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+    Button View_B {
+        String text:= ['View User']
+        String probe1
+        Role probe2
+        event onClick {
+            if [ (not $Table_T.selected$.oclIsUndefined())  ] {
+                try {
+                    probe1 := [$Table_T.selected$.name]
+                    probe1 := [$Table_T.selected$.surname]
+                    probe1 := [$Table_T.selected$.username]
+                    probe2 := [$Table_T.selected$.role]
+                    open UserWindow(caller:[$UserListWindow.caller$], role:[$UserListWindow.role$], entity:[$Table_T.selected$])    
+                    
+                } catch (SecurityException) {
+                    notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Nothing selected'],[500])
+            }
+        }
+    }
+    Button Back_B {
+        String text := ['Back']
+        event onClick {
+            back
+        }
+    }
+}

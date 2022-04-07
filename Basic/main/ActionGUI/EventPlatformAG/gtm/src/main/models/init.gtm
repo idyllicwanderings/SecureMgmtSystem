@@ -1,0 +1,55 @@
+Window InitWindow {
+    Button Init_b {
+        String text:= ['Init']
+        Person adminUser
+        Person visitorUser
+        event onClick {
+
+            try {
+
+                //create a default administrator (to be able to use the application via GUI)
+                adminUser := [Person.allInstances()->any(c|c.username.equalsIgnoreCase('admin'))]
+                if [ $adminUser$.oclIsUndefined() ] {
+
+                    newUser := new Person
+                    [$newUser$.name]:=['admin']
+                    [$newUser$.surname]:=['admin']
+                    [$newUser$.username]:=['admin']
+                    [$newUser$.password]:=['admin']
+                    [$newUser$.role]:=[Role::ADMIN]
+
+                }
+                
+                //create the singleton visitor user
+                visitorUser := [Person.allInstances()->any(c|c.role = Role::VISITOR)]
+                if [ $visitorUser$.oclIsUndefined() ] {
+
+                    newVisitor := new Person
+                    [$newVisitor$.name]:=['']
+                    [$newVisitor$.surname]:=['']
+                    [$newVisitor$.username]:=['']
+                    [$newVisitor$.password]:=['']
+                    [$newVisitor$.role]:=[Role::VISITOR]
+                    open MainWindow(caller: [$newVisitor$], role:[Role::VISITOR])
+
+                } else {
+
+                    open MainWindow(caller: [$visitorUser$], role:[Role::VISITOR])
+
+                }
+
+            } catch (SecurityException) {
+                notification(['Error'],['Not allowed. Please, do not change the SYSTEM role'],[500])
+            }
+
+            
+        }
+    }
+
+    Button Evaluation_B {
+        String text:= ['Evaluation']
+        event onClick {
+            open EvaluationWindow(role:[Role::SYSTEM])
+        }
+    }
+}

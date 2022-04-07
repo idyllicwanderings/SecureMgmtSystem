@@ -1,0 +1,57 @@
+Window MainWindow {
+    String text := ['Welcome!']
+
+    Label User_L {
+        String text := [if $MainWindow.role$ = Role::VISITOR then 'Hello visitor!' 
+                        else 'Hello '.concat($MainWindow.caller$.username.concat('!')) endif]
+    }
+
+    Button Login_B {
+        String text:= ['Login']
+        event onClick {
+            if [ $MainWindow.role$ = Role::VISITOR ]{
+              open LoginWindow(role:[Role::NONE])
+            }
+            else {
+              notification(['Error'],['Already logged in as ' + $MainWindow.caller$.username],[500])
+            }
+        }
+    }
+
+    Button Profile_B {
+        String text := ['User Profile']
+        Set(Event) probe1
+        Set(Category) probe2
+        event onClick {
+            try {
+                // Reading probes (ensuring that tables in UserProfileWindow can render data)
+                probe1 := [$MainWindow.caller$.events]
+                probe1 := [$MainWindow.caller$.attends]
+                probe1 := [$MainWindow.caller$.manages]
+                probe2 := [$MainWindow.caller$.subscriptions]
+                probe1 := [$MainWindow.caller$.subscriptions.events->asSet()]
+                open UserProfileWindow(caller:[$MainWindow.caller$], role:[$MainWindow.role$], entity:[$MainWindow.caller$])
+            } catch (SecurityException) {
+                notification(['Error'],['Not allowed'],[500])
+            }
+        }
+    }
+    Button Events_B {
+        String text:=['Events']
+        event onClick {
+            open EventListWindow(caller:[$MainWindow.caller$], role:[$MainWindow.role$])
+        }
+    }
+    Button Categories_B {
+        String text := ['Categories']
+        event onClick {
+            open CategoryListWindow(caller:[$MainWindow.caller$], role:[$MainWindow.role$])
+        }
+    }
+    Button Users_B {
+        String text := ['Users']
+        event onClick {
+            open UserListWindow(caller:[$MainWindow.caller$], role:[$MainWindow.role$])
+        }
+    }
+}

@@ -1,0 +1,16 @@
+// The SYSTEM role is required for initializing and testing the application
+// Please do not change this file
+role SYSTEM {
+  Person {
+    fullAccess
+  }
+  Event {
+    fullAccess
+  }
+  Category {
+    fullAccess
+  }
+  Invite {
+    fullAccess
+  }
+}

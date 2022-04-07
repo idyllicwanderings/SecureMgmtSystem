@@ -1,0 +1,105 @@
+Window CategoryViewWindow {
+    Category entity
+    Label Category_L {
+        String text := ['Category: ' + $CategoryViewWindow.entity$.name]
+    }
+    Label Title_L {
+        String text := ['Events:']
+    }
+    Table Table_T {
+        Set(Event) rows := [$CategoryViewWindow.entity$.events]
+        Event selected := [null]
+        columns {
+            ['Title'] : Label title {
+                event onView (text) {
+                    try {
+                        text := [$Table_T.row$.title]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+            ['Owner'] : Label own {
+                event onView (text) {
+                    try {
+                        text := [$Table_T.row$.owner.name.concat(' ').concat($Table_T.row$.owner.surname)]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+    Button View_Evt_B {
+        String text:= ['View Event']
+        String probe1
+        Set(Category) probe2
+        event onClick {
+            if [(not $Table_T.selected$.oclIsUndefined())] {
+                try {
+
+                    probe1 := [$Table_T.selected$.title]
+                    probe1 := [$Table_T.selected$.description]
+                    probe2 := [$Table_T.selected$.categories]
+                    open EventViewWindow(caller:[$CategoryViewWindow.caller$], role:[$CategoryViewWindow.role$], entity:[$Table_T.selected$])
+                    
+                } catch (SecurityException) {
+                    notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Nothing selected'],[500])
+            }
+        }
+    }
+    Button Remove_B {
+        String text:= ['Remove Event from Category']
+        event onClick {
+            if [(not $Table_T.selected$.oclIsUndefined())] {
+                try {
+                    [$Table_T.selected$.categories] -= [$CategoryViewWindow.entity$]
+
+                    notification(['Success'],['Category removed'],[500])
+                    Table_T.rows := [null]
+                    reevaluate Table_T.rows
+                } catch (SecurityException) {
+                    notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Nothing selected'],[500])
+            }
+        }
+    }
+
+    Button View_B {
+        String text:= ['Show subscribers']
+        event onClick {
+            try {
+                Table_Subs_T.rows := [$CategoryViewWindow.entity$.subscribers->collect(m|m.name.concat(' ').concat(m.surname))->asSet()]
+                //reevaluate Table_Subs_T.rows
+
+            } catch(SecurityException) {
+                notification(['Error'],['Not allowed'],[500])
+            }
+        }
+    }
+    Table Table_Subs_T {
+        Set(String) rows := [Set {}]
+        columns {
+            ['Subscribers'] : Label username {
+                event onView (text) {
+                    try {
+                        text := [$Table_Subs_T.row$]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+    Button Back_B {
+        String text := ['Back']
+        event onClick {
+            back
+        }
+    }
+}

@@ -1,0 +1,75 @@
+entity Person {
+  String name
+  String surname
+  String username
+  String password
+  Role role
+
+  // Events
+  Set(Event) events oppositeTo owner
+  Set(Event) manages oppositeTo managedBy
+  Set(Event) attends oppositeTo attendants
+
+  // Categories
+  Set(Category) subscriptions oppositeTo subscribers
+  Set(Category) moderates oppositeTo moderators
+
+  // Requests
+  Set(Event) requests oppositeTo requesters
+
+  // Invites
+  Set(Invite) invitations oppositeTo invitee
+  Set(Invite) invites oppositeTo invitedBy
+}
+
+entity Event {
+  String title
+  String description
+  Boolean private
+
+  // Person
+  Person owner oppositeTo events
+  Set(Person) managedBy oppositeTo manages
+  Set(Person) attendants oppositeTo attends
+
+  // Categories
+  Set(Category) categories oppositeTo events
+
+  // Requests
+  Set(Person) requesters oppositeTo requests
+
+  //Invites
+  Set(Invite) invitations oppositeTo event
+}
+
+
+entity Category {
+  String name
+
+  // Person
+  Set(Person) subscribers oppositeTo subscriptions
+  Set(Person) moderators oppositeTo moderates
+
+  // Events
+  Set(Event) events oppositeTo categories
+}
+
+
+entity Invite {
+  
+  Person invitee oppositeTo invitations
+  Person invitedBy oppositeTo invites
+  Event event oppositeTo invitations
+  
+}
+
+
+enum Role {
+  NONE
+  VISITOR
+  FREEUSER
+  PREMIUMUSER
+  MODERATOR
+  ADMIN
+  SYSTEM
+}

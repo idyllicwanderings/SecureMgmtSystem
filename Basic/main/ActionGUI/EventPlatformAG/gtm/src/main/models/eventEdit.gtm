@@ -1,0 +1,89 @@
+Window EventEditWindow {
+    Event entity
+
+    Label Title_L {
+        String text := ['Title']
+    }
+    TextField Title_TF {
+        String text := [$EventEditWindow.entity$.title]
+    }
+    Label Description_L {
+        String text := ['Description']
+    }
+    TextField Description_TF {
+        String text := [$EventEditWindow.entity$.description]
+    }
+    Label Category_L {
+        String text := ['Category']
+    }
+    Table Table_Category_T {
+        Set(Category) rows := [Category.allInstances()]
+        Set(Category) selected  := [$EventEditWindow.entity$.categories]
+        columns {
+            ['Name'] : Label name {
+                event onView (text) {
+                    try {
+                        text := [$Table_Category_T.row$.name]
+                    } catch (SecurityException) {
+                        text := ['RESTRICTED']
+                    }
+                }
+           }
+        }
+    }
+    Button Update_B {
+        String text := ['Update']
+        event onClick {
+            if [(not $Title_TF.text$.oclIsUndefined()) and
+                (not ($Title_TF.text$.size()=0)) and
+                (not $Description_TF.text$.oclIsUndefined()) and
+                (not ($Description_TF.text$.size()=0)) and
+                (not $Table_Category_T.selected$->oclIsUndefined())
+            ] {
+                try {
+                    [$EventEditWindow.entity$.title] := [$Title_TF.text$]
+                    [$EventEditWindow.entity$.description] := [$Description_TF.text$]
+
+                    foreach cat1 in [$EventEditWindow.entity$.categories] {
+                        [$EventEditWindow.entity$.categories]-=[$cat1$]
+                    }
+                    foreach cat2 in [$Table_Category_T.selected$] {
+                        [$EventEditWindow.entity$.categories]+=[$cat2$]
+                    }
+
+                    notification(['Success'],['Event updated'],[500])
+                } catch (SecurityException) {
+                    notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Form contains errors.'],[500])
+            }
+        }
+    }
+
+    Button Manage_B {
+        String text:= ['Manage Event']
+        Set(Person) probe
+        event onClick {
+            try {
+                probe := [$EventEditWindow.entity$.attendants]
+                probe := [$EventEditWindow.entity$.managedBy]
+                probe := [$EventEditWindow.entity$.requesters]
+                // if [$EventEditWindow.caller$.manages->includes($EventEditWindow.entity$)] {
+                    open EventManageWindow(caller:[$EventEditWindow.caller$], role:[$EventEditWindow.role$], entity:[$EventEditWindow.entity$])
+                // } else {
+                //     notification(['Error'],['Not allowed'],[500])
+                // }
+            } catch (SecurityException) {
+                notification(['Error'],['Not allowed'],[500])
+            }
+        }
+    }
+
+    Button Back_B {
+        String text := ['Back']
+        event onClick {
+            back
+        }
+    }
+}
